@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "tstl",
+    "dev": "tstl --watch"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "typescript-to-lua": "latest",
+    "lua-types": "latest",
+    "ts-node": "latest",
+    "eslint": "latest",
+    "@eslint/js": "latest",
+    "@types/eslint__js": "latest",
+    "typescript-eslint": "latest",
+    "prettier": "latest"
+  }
+}

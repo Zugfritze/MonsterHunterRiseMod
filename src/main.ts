@@ -1,0 +1,57 @@
+import { Character } from "./Character";
+import { ItemBoxEdit } from "./ItemBoxEdit";
+import { InfiniteConsumables } from "./InfiniteConsumables";
+import { BuddySkillEdit } from "./BuddySkillEdit";
+import { Debug } from "./Debug";
+
+class Main {
+  static is_init: boolean = false;
+  static font: FontIndex | undefined = undefined;
+  static drawWindow: boolean = false;
+
+  static init(): boolean {
+    this.font = imgui.load_font("NotoSansSC-Bold.otf", 18, [0x1, 0xffff, 0]);
+    if (this.font == undefined) {
+      return false;
+    }
+
+    if (!ItemBoxEdit.init()) {
+      return false;
+    }
+
+    Character.init_hook();
+    InfiniteConsumables.init_hook();
+
+    return true;
+  }
+
+  static ui() {
+    if (!this.is_init) {
+      this.is_init = this.init();
+    } else {
+      imgui.push_font(this.font!);
+      if (imgui.button("半瓶气水-MHR菜单")) {
+        this.drawWindow = !this.drawWindow;
+      }
+      if (this.drawWindow) {
+        if (imgui.begin_window("半瓶气水-MHR", true, 64)) {
+          Character.ui();
+          ItemBoxEdit.ui();
+          InfiniteConsumables.ui();
+          BuddySkillEdit.ui();
+          Debug.ui();
+          imgui.end_window();
+        } else {
+          this.drawWindow = false;
+        }
+      }
+      imgui.pop_font();
+    }
+  }
+}
+
+Main.init();
+
+re.on_draw_ui(() => {
+  Main.ui();
+});
