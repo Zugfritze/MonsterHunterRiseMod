@@ -3,7 +3,7 @@ import { Utils } from "./Utils";
 
 export class InfiniteConsumables {
   private static config = new ConfigManager(
-    "BPQSMHR/infinite_consumables.json",
+    "BPQSMHRMod/infinite_consumables.json",
     {
       infiniteCoating: false,
       infiniteAmmo: false,
@@ -12,17 +12,17 @@ export class InfiniteConsumables {
       infiniteWirebug: false,
     },
   );
+  private static uiConfigItems = [
+    { label: "无限瓶(用于弓)", key: "infiniteCoating" },
+    { label: "无限弹药(用于弩)", key: "infiniteAmmo" },
+    { label: "无限物品(药、食物、陷阱等)", key: "infiniteItem" },
+    { label: "无限特有生命(蜘蛛、甲虫等)", key: "infiniteEndemicLife" },
+    { label: "无限线虫", key: "infiniteWirebug" },
+  ];
 
   static ui() {
     if (imgui.tree_node("无限消耗品")) {
-      const configItems = [
-        { label: "无限瓶(用于弓)", key: "infiniteCoating" },
-        { label: "无限弹药(用于弩)", key: "infiniteAmmo" },
-        { label: "无限物品(药、食物、陷阱等)", key: "infiniteItem" },
-        { label: "无限特有生命(蜘蛛、甲虫等)", key: "infiniteEndemicLife" },
-        { label: "无限线虫", key: "infiniteWirebug" },
-      ];
-      for (const item of configItems) {
+      for (const item of this.uiConfigItems) {
         const [changed, value] = imgui.checkbox(
           item.label,
           this.config.get(item.key),

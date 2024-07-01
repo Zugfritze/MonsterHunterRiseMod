@@ -33,11 +33,9 @@ declare class REMethodDefinition {
 
   get_num_params(): number;
 
-  // TOO
-  get_param_types(): any;
+  get_param_types(): Array<RETypeDefinition>;
 
-  // TOO
-  get_param_names(): any;
+  get_param_names(): Array<string>;
 
   is_static(): boolean;
 
@@ -58,8 +56,6 @@ declare class REManagedObject {
   get_address(): number;
 
   get_reference_count(): number;
-
-  deserialize_native(data: any, objects: any): any;
 
   add_ref(): void;
 

@@ -10,6 +10,7 @@ export default tseslint.config(
         rules: {
             "@typescript-eslint/triple-slash-reference": "off",
             "@typescript-eslint/no-explicit-any": "off",
+            "@typescript-eslint/no-namespace": "off",
         },
     },
 );

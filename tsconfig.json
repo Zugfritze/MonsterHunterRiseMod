@@ -21,7 +21,7 @@
     "luaLibImport": "require-minimal",
     "sourceMapTraceback": false,
     "tstlVerbose": true,
-    "luaBundle": "out/MHR-mod.lua",
+    "luaBundle": "out/BPQSMHRMod.lua",
     "luaBundleEntry": "src/main.ts",
     "luaPlugins": [
       {

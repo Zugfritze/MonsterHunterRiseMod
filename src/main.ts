@@ -3,6 +3,8 @@ import { ItemBoxEdit } from "./ItemBoxEdit";
 import { InfiniteConsumables } from "./InfiniteConsumables";
 import { BuddySkillEdit } from "./BuddySkillEdit";
 import { Debug } from "./Debug";
+import { imgui_extra } from "./Utils";
+import ImGuiWindowFlags = imgui_extra.ImGuiWindowFlags;
 
 class Main {
   static is_init: boolean = false;
@@ -34,7 +36,13 @@ class Main {
         this.drawWindow = !this.drawWindow;
       }
       if (this.drawWindow) {
-        if (imgui.begin_window("半瓶气水-MHR", true, 64)) {
+        if (
+          imgui.begin_window(
+            "半瓶气水-MHR",
+            true,
+            ImGuiWindowFlags.AlwaysAutoResize,
+          )
+        ) {
           Character.ui();
           ItemBoxEdit.ui();
           InfiniteConsumables.ui();

@@ -1,4 +1,5 @@
 {
+  "name": "bpqs-monster-hunter-rise-mod",
   "private": true,
   "scripts": {
     "build": "tstl",

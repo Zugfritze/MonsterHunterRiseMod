@@ -12,7 +12,7 @@ export class ConfigManager {
 
   load() {
     const configFile = json.load_file(this.configPath);
-    if (configFile != null) {
+    if (configFile != undefined) {
       this.config = configFile;
     } else {
       this.save();

@@ -1,19 +1,49 @@
 import { ConfigManager } from "./ConfigManager";
-import { ReferenceType, Utils } from "./Utils";
+import { imgui_extra, ReferenceType, Utils } from "./Utils";
+import ImGuiInputTextFlags = imgui_extra.ImGuiInputTextFlags;
 
 export class Character {
-  private static config = new ConfigManager("BPQSMHR/character.json", {
+  private static config = new ConfigManager("BPQSMHRMod/character.json", {
     attack: 0,
     defence: 0,
     PercentageVitalRecovery: 0,
   });
-  private static attack_modify: ReferenceType<boolean> = new ReferenceType(
-    false,
-  );
-  private static defence_modify: ReferenceType<boolean> = new ReferenceType(
-    false,
-  );
   private static lastTime: number = os.time();
+  private static uiConfigItems = [
+    {
+      label: "额外攻击力",
+      key: "attack",
+      min: 0,
+      max: 2600,
+      float: false,
+    },
+    {
+      label: "额外防御力",
+      key: "defence",
+      min: 0,
+      max: 3100,
+      float: false,
+    },
+    {
+      label: "每秒生命恢复百分比",
+      key: "PercentageVitalRecovery",
+      min: 0,
+      max: 100,
+      float: true,
+    },
+  ];
+  private static modifyStatConfig = [
+    {
+      key: "attack",
+      field: "_AtkUpAlive",
+      modifyFlag: new ReferenceType(false),
+    },
+    {
+      key: "defence",
+      field: "_DefUpAlive",
+      modifyFlag: new ReferenceType(false),
+    },
+  ];
 
   static ui() {
     if (imgui.tree_node("玩家编辑")) {
@@ -28,46 +58,16 @@ export class Character {
         imgui.tree_pop();
       }
 
-      const configItems = [
-        {
-          label: "额外攻击力",
-          key: "attack",
-          min: 0,
-          max: 2600,
-          float: false,
-        },
-        {
-          label: "额外防御力",
-          key: "defence",
-          min: 0,
-          max: 3100,
-          float: false,
-        },
-        {
-          label: "每秒生命恢复百分比",
-          key: "PercentageVitalRecovery",
-          min: 0,
-          max: 100,
-          float: true,
-        },
-      ];
-
-      for (const item of configItems) {
-        const [changed, value_string] = imgui.input_text(
+      for (const item of this.uiConfigItems) {
+        const [changed, value] = imgui_extra.input_number(
           item.label,
-          this.config.get(item.key).toString(),
+          this.config.get(item.key),
+          [item.min, item.max],
+          item.float,
+          ImGuiInputTextFlags.EnterReturnsTrue,
         );
         if (changed) {
-          let value_number: number | undefined;
-          if (item.float) {
-            value_number = parseFloat(value_string);
-          } else {
-            value_number = parseInt(value_string, 10);
-          }
-          if (value_number != undefined) {
-            const value = Math.max(item.min, Math.min(item.max, value_number));
-            this.config.set(item.key, value);
-          }
+          this.config.set(item.key, value);
         }
       }
       imgui.tree_pop();
@@ -79,20 +79,7 @@ export class Character {
       const playerData = Utils.getPlayerData();
       if (!playerData) return;
 
-      const modifyStatConfig = [
-        {
-          key: "attack",
-          field: "_AtkUpAlive",
-          modifyFlag: this.attack_modify,
-        },
-        {
-          key: "defence",
-          field: "_DefUpAlive",
-          modifyFlag: this.defence_modify,
-        },
-      ];
-
-      for (const modifyStat of modifyStatConfig) {
+      for (const modifyStat of this.modifyStatConfig) {
         const value: number = this.config.get(modifyStat.key);
         if (value != undefined && value >= 1) {
           modifyStat.modifyFlag.value = true;

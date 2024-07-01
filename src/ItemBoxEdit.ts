@@ -1,3 +1,5 @@
+import { imgui_extra } from "./Utils";
+
 export class ItemBoxEdit {
   private static mo_data_manager: REManagedObject | undefined;
   private static mo_item_box: REManagedObject | undefined;
@@ -25,11 +27,7 @@ export class ItemBoxEdit {
     this.m_get_item_name = t_data_shortcut.get_method(
       "getName(snow.data.ContentsIdSystem.ItemId)",
     );
-    if (this.m_get_item_name == undefined) {
-      return false;
-    }
-
-    return true;
+    return this.m_get_item_name != undefined;
   }
 
   static ui() {
@@ -41,7 +39,6 @@ export class ItemBoxEdit {
         this.Item_name_search = imgui.input_text(
           "搜索",
           this.Item_name_search,
-          0,
         )[1];
         for (let i = 0; i < items_count; i++) {
           const item: REManagedObject = items.call("get_Item", i);
@@ -71,19 +68,13 @@ export class ItemBoxEdit {
         }
         imgui.tree_pop();
       }
-      const [Item_box_slot_changed, Item_box_slot_string] = imgui.input_text(
-        "物品箱槽位",
-        this.Item_box_slot.toString(),
-        0,
-      );
+      const [Item_box_slot_changed, Item_box_slot_value] =
+        imgui_extra.input_number("物品箱槽位", this.Item_box_slot, [
+          1,
+          items_count,
+        ]);
       if (Item_box_slot_changed) {
-        const Item_box_slot_number = parseInt(Item_box_slot_string);
-        if (!isNaN(Item_box_slot_number)) {
-          this.Item_box_slot = Math.max(
-            1,
-            Math.min(items_count, Item_box_slot_number),
-          );
-        }
+        this.Item_box_slot = Item_box_slot_value;
       }
       const item: REManagedObject = items.call(
         "get_Item",
@@ -102,16 +93,13 @@ export class ItemBoxEdit {
         imgui.text(
           `物品ID: ${item_data_id} 名称: ${item_name} 数量: ${item_data_amt}`,
         );
-        const [Item_amt_changed, Item_amt_string] = imgui.input_text(
+        const [Item_amt_changed, Item_amt_value] = imgui_extra.input_number(
           "物品数量",
-          this.Item_amt.toString(),
-          0,
+          this.Item_amt,
+          [1, 9999],
         );
         if (Item_amt_changed) {
-          const Item_amt_number = parseInt(Item_amt_string);
-          if (!isNaN(Item_amt_number)) {
-            this.Item_amt = Math.max(1, Math.min(9999, Item_amt_number));
-          }
+          this.Item_amt = Item_amt_value;
         }
         if (imgui.button("修改数量至x" + this.Item_amt)) {
           item_data.set_field("_Num", this.Item_amt);
