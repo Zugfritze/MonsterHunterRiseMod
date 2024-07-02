@@ -1,5 +1,5 @@
 import { ConfigManager } from "./ConfigManager";
-import { Utils } from "./Utils";
+import { KeysOfType, Utils } from "./Utils";
 
 class InfiniteConsumablesConfig {
   infiniteCoating: boolean = false;
@@ -16,7 +16,7 @@ export class InfiniteConsumables {
   );
   private static uiConfigItems: {
     label: string;
-    key: keyof InfiniteConsumablesConfig;
+    key: KeysOfType<InfiniteConsumablesConfig, boolean>;
   }[] = [
     { label: "无限瓶(用于弓)", key: "infiniteCoating" },
     { label: "无限弹药(用于弩)", key: "infiniteAmmo" },

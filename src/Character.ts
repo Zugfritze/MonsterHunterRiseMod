@@ -1,5 +1,5 @@
 import { ConfigManager } from "./ConfigManager";
-import { imgui_extra, ReferenceType, Utils } from "./Utils";
+import { imgui_extra, KeysOfType, ReferenceType, Utils } from "./Utils";
 import ImGuiInputTextFlags = imgui_extra.ImGuiInputTextFlags;
 
 class CharacterConfig {
@@ -16,7 +16,7 @@ export class Character {
   private static lastTime: number = os.time();
   private static uiConfigItems: {
     label: string;
-    key: keyof CharacterConfig;
+    key: KeysOfType<CharacterConfig, number>;
     min: number;
     max: number;
     float: boolean;
@@ -44,7 +44,7 @@ export class Character {
     },
   ];
   private static modifyStatConfig: {
-    key: keyof CharacterConfig;
+    key: KeysOfType<CharacterConfig, number>;
     field: string;
     modifyFlag: ReferenceType<boolean>;
   }[] = [
