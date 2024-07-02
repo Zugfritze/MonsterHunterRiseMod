@@ -1,3 +1,5 @@
+import { KeysOfType } from "./Utils";
+
 export class ConfigManager<T extends { [key: string]: any }> {
   private readonly configPath: string;
   private config: T;
@@ -10,12 +12,16 @@ export class ConfigManager<T extends { [key: string]: any }> {
     this.load();
   }
 
+  get<K extends keyof T>(key: K): T[K];
+  get<V>(key: Extract<keyof T, KeysOfType<T, V>>): V;
   get<K extends keyof T>(key: K): T[K] {
     return this.config[key] != undefined
       ? this.config[key]
       : this.defaultConfig[key];
   }
 
+  set<K extends keyof T>(key: K, value: T[K]): void;
+  set<V>(key: Extract<keyof T, KeysOfType<T, V>>, value: V): void;
   set<K extends keyof T>(key: K, value: T[K]): void {
     if (this.config[key] != value) {
       this.config[key] = value;
