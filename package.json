@@ -13,7 +13,7 @@
     "eslint": "latest",
     "@eslint/js": "latest",
     "@types/eslint__js": "latest",
-    "typescript-eslint": "latest",
+    "typescript-eslint": "rc-v8",
     "prettier": "latest"
   }
 }
