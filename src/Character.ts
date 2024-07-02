@@ -36,12 +36,12 @@ export class Character {
     {
       key: "attack",
       field: "_AtkUpAlive",
-      modifyFlag: new ReferenceType(false),
+      modifyFlag: new ReferenceType<boolean>(false),
     },
     {
       key: "defence",
       field: "_DefUpAlive",
-      modifyFlag: new ReferenceType(false),
+      modifyFlag: new ReferenceType<boolean>(false),
     },
   ];
 

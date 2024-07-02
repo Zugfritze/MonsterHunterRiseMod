@@ -129,7 +129,16 @@ export namespace imgui_extra {
   }
 }
 
-export class ReferenceType<T> {
+type PrimitiveType =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | symbol
+  | bigint;
+
+export class ReferenceType<T extends PrimitiveType> {
   value: T;
 
   constructor(value: T) {
