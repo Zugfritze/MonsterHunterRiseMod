@@ -4,7 +4,7 @@ declare namespace json {
 
   function dump_string(value: object, indent?: number): string;
 
-  function load_file(filepath: string): LuaTable | undefined;
+  function load_file(filepath: string): LuaTable<string> | undefined;
 
   function dump_file(filepath: string, value: object, indent?: number): boolean;
 }

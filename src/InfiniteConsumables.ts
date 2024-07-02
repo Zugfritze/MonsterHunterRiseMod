@@ -1,18 +1,23 @@
 import { ConfigManager } from "./ConfigManager";
 import { Utils } from "./Utils";
 
+class InfiniteConsumablesConfig {
+  infiniteCoating: boolean = false;
+  infiniteAmmo: boolean = false;
+  infiniteItem: boolean = false;
+  infiniteEndemicLife: boolean = false;
+  infiniteWirebug: boolean = false;
+}
+
 export class InfiniteConsumables {
   private static config = new ConfigManager(
     "BPQSMHRMod/infinite_consumables.json",
-    {
-      infiniteCoating: false,
-      infiniteAmmo: false,
-      infiniteItem: false,
-      infiniteEndemicLife: false,
-      infiniteWirebug: false,
-    },
+    new InfiniteConsumablesConfig(),
   );
-  private static uiConfigItems = [
+  private static uiConfigItems: {
+    label: string;
+    key: keyof InfiniteConsumablesConfig;
+  }[] = [
     { label: "无限瓶(用于弓)", key: "infiniteCoating" },
     { label: "无限弹药(用于弩)", key: "infiniteAmmo" },
     { label: "无限物品(药、食物、陷阱等)", key: "infiniteItem" },

@@ -2,14 +2,25 @@ import { ConfigManager } from "./ConfigManager";
 import { imgui_extra, ReferenceType, Utils } from "./Utils";
 import ImGuiInputTextFlags = imgui_extra.ImGuiInputTextFlags;
 
+class CharacterConfig {
+  attack: number = 0;
+  defence: number = 0;
+  PercentageVitalRecovery: number = 0;
+}
+
 export class Character {
-  private static config = new ConfigManager("BPQSMHRMod/character.json", {
-    attack: 0,
-    defence: 0,
-    PercentageVitalRecovery: 0,
-  });
+  private static config = new ConfigManager(
+    "BPQSMHRMod/character.json",
+    new CharacterConfig(),
+  );
   private static lastTime: number = os.time();
-  private static uiConfigItems = [
+  private static uiConfigItems: {
+    label: string;
+    key: keyof CharacterConfig;
+    min: number;
+    max: number;
+    float: boolean;
+  }[] = [
     {
       label: "额外攻击力",
       key: "attack",
@@ -32,7 +43,11 @@ export class Character {
       float: true,
     },
   ];
-  private static modifyStatConfig = [
+  private static modifyStatConfig: {
+    key: keyof CharacterConfig;
+    field: string;
+    modifyFlag: ReferenceType<boolean>;
+  }[] = [
     {
       key: "attack",
       field: "_AtkUpAlive",
