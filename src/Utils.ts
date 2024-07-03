@@ -149,3 +149,39 @@ export class ReferenceType<T extends PrimitiveType> {
 export type KeysOfType<T, V> = {
   [K in keyof T]: T[K] extends V ? K : never;
 }[keyof T];
+
+export class TypeSafeAccessor {
+  static get<T, K extends keyof T>(object: T, key: K): T[K];
+
+  static get<T, V>(object: T, key: Extract<keyof T, KeysOfType<T, V>>): V;
+
+  static get<T, K extends keyof T>(object: T, key: K): T[K] {
+    return object[key];
+  }
+
+  static set<T, K extends keyof T>(object: T, key: K, value: T[K]): void;
+  static set<T, V>(
+    object: T,
+    key: Extract<keyof T, KeysOfType<T, V>>,
+    value: V,
+  ): void;
+  static set<T, K extends keyof T>(object: T, key: K, value: T[K]): void {
+    object[key] = value;
+  }
+
+  get<K extends keyof this>(key: K): this[K];
+
+  get<V>(key: Extract<keyof this, KeysOfType<this, V>>): V;
+
+  get<K extends keyof this>(key: K): this[K] {
+    return this[key];
+  }
+
+  set<K extends keyof this>(key: K, value: this[K]): void;
+
+  set<V>(key: Extract<keyof this, KeysOfType<this, V>>, value: V): void;
+
+  set<K extends keyof this>(key: K, value: this[K]): void {
+    this[key] = value;
+  }
+}
