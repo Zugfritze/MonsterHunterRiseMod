@@ -1,10 +1,15 @@
 import { imgui_extra } from "./Tools/imgui_extra";
+import ImGuiTableFlags = imgui_extra.ImGuiTableFlags;
 
 export class ItemBoxEdit {
   private static mo_data_manager: REManagedObject | undefined;
   private static mo_item_box: REManagedObject | undefined;
   private static m_get_item_name: REMethodDefinition | undefined;
-  private static Item_name_search: string = "";
+  private static searchText: string = "";
+  private static searchByItemBoxSlot: boolean = true;
+  private static searchByItemID: boolean = true;
+  private static searchByItemName: boolean = true;
+  private static searchByItemAmt: boolean = true;
   private static Item_box_slot: number = 1;
   private static Item_amt: number = 1;
 
@@ -35,39 +40,79 @@ export class ItemBoxEdit {
       const items: REManagedObject =
         this.mo_item_box!.get_field("_InventoryList");
       const items_count: number = items.call("get_Count");
-      if (imgui.tree_node("物品箱槽位预览")) {
-        this.Item_name_search = imgui.input_text(
-          "搜索",
-          this.Item_name_search,
-        )[1];
+
+      this.searchText = imgui.input_text("搜索", this.searchText)[1];
+      this.searchByItemBoxSlot = imgui.checkbox(
+        "搜索槽位",
+        this.searchByItemBoxSlot,
+      )[1];
+      imgui.same_line();
+      this.searchByItemID = imgui.checkbox(
+        "搜索物品ID",
+        this.searchByItemID,
+      )[1];
+      imgui.same_line();
+      this.searchByItemName = imgui.checkbox(
+        "搜索物品名称",
+        this.searchByItemName,
+      )[1];
+      imgui.same_line();
+      this.searchByItemAmt = imgui.checkbox(
+        "搜索物品数量",
+        this.searchByItemAmt,
+      )[1];
+
+      if (imgui.begin_table("物品箱表", 5, ImGuiTableFlags.Borders)) {
+        imgui.table_setup_column("槽位");
+        imgui.table_setup_column("物品ID");
+        imgui.table_setup_column("物品名称");
+        imgui.table_setup_column("物品数量");
+
+        imgui.table_headers_row();
+
         for (let i = 0; i < items_count; i++) {
           const item: REManagedObject = items.call("get_Item", i);
           const item_data: REManagedObject = item.get_field("_ItemCount");
-          const item_data_id: number = item_data.get_field("_Id");
-          if (item_data_id != 67108864) {
-            const item_name: string = this.m_get_item_name!.call(
-              null,
-              item_data_id,
-            );
-            if (
-              this.Item_name_search == "" ||
-              item_name.includes(this.Item_name_search)
-            ) {
-              const item_data_amt: number = item_data.get_field("_Num");
-              imgui.push_id("设置槽位" + (i + 1));
-              if (imgui.button("设置槽位")) {
-                this.Item_box_slot = i + 1;
-              }
-              imgui.pop_id();
-              imgui.same_line();
-              imgui.text(
-                `槽位: ${i + 1} 物品ID: ${item_data_id} 名称: ${item_name} 数量: ${item_data_amt}`,
-              );
+
+          const item_box_slot = i + 1;
+          const item_box_slot_string = item_box_slot.toString();
+          const item_id: number = item_data.get_field("_Id");
+          const item_id_string = item_id.toString();
+          const item_name: string = this.m_get_item_name!.call(null, item_id);
+          const item_amt: number = item_data.get_field("_Num");
+          const item_amt_string = item_amt.toString();
+
+          if (
+            item_id != 67108864 &&
+            (this.searchText == "" ||
+              (this.searchByItemBoxSlot &&
+                item_box_slot_string.includes(this.searchText)) ||
+              (this.searchByItemID &&
+                item_id_string.includes(this.searchText)) ||
+              (this.searchByItemName && item_name.includes(this.searchText)) ||
+              (this.searchByItemAmt &&
+                item_amt_string.includes(this.searchText)))
+          ) {
+            imgui.table_next_row();
+            imgui.table_set_column_index(0);
+            imgui.text(item_box_slot_string);
+            imgui.table_set_column_index(1);
+            imgui.text(item_id_string);
+            imgui.table_set_column_index(2);
+            imgui.text(item_name);
+            imgui.table_set_column_index(3);
+            imgui.text(item_amt_string);
+            imgui.table_set_column_index(4);
+            imgui.push_id(item_box_slot);
+            if (imgui.button("设置槽位")) {
+              this.Item_box_slot = item_box_slot;
             }
+            imgui.pop_id();
           }
         }
-        imgui.tree_pop();
+        imgui.end_table();
       }
+
       const [Item_box_slot_changed, Item_box_slot_value] =
         imgui_extra.input_number("物品箱槽位", this.Item_box_slot, [
           1,

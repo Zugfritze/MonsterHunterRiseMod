@@ -1,7 +1,7 @@
 import { ConfigManager } from "./ConfigManager";
 import { Utils } from "./Utils";
 import { imgui_extra } from "./Tools/imgui_extra";
-import { KeysOfType, ReferenceType } from "./Tools/Types";
+import { KeysOfType } from "./Tools/Types";
 import ImGuiInputTextFlags = imgui_extra.ImGuiInputTextFlags;
 
 class CharacterConfig {
@@ -48,17 +48,17 @@ export class Character {
   private static modifyStatConfig: {
     key: KeysOfType<CharacterConfig, number>;
     field: string;
-    modifyFlag: ReferenceType<boolean>;
+    modifyFlag: boolean;
   }[] = [
     {
       key: "attack",
       field: "_AtkUpAlive",
-      modifyFlag: new ReferenceType<boolean>(false),
+      modifyFlag: false,
     },
     {
       key: "defence",
       field: "_DefUpAlive",
-      modifyFlag: new ReferenceType<boolean>(false),
+      modifyFlag: false,
     },
   ];
 
@@ -99,10 +99,10 @@ export class Character {
       for (const modifyStat of this.modifyStatConfig) {
         const value: number = this.config.get(modifyStat.key);
         if (value != undefined && value >= 1) {
-          modifyStat.modifyFlag.value = true;
+          modifyStat.modifyFlag = true;
           playerData.set_field(modifyStat.field, value);
-        } else if (modifyStat.modifyFlag.value) {
-          modifyStat.modifyFlag.value = false;
+        } else if (modifyStat.modifyFlag) {
+          modifyStat.modifyFlag = false;
           playerData.set_field(modifyStat.field, 0);
         }
       }

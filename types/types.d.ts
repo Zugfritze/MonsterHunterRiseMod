@@ -7,11 +7,11 @@ declare class RETypeDefinition {
 
   get_method(name: string): REMethodDefinition;
 
-  get_methods(): Array<REMethodDefinition>;
+  get_methods(): REMethodDefinition[];
 
   get_field(name: string): REField;
 
-  get_fields(): Array<REField>;
+  get_fields(): REField[];
 }
 
 declare class REField {
@@ -33,9 +33,9 @@ declare class REMethodDefinition {
 
   get_num_params(): number;
 
-  get_param_types(): Array<RETypeDefinition>;
+  get_param_types(): RETypeDefinition[];
 
-  get_param_names(): Array<string>;
+  get_param_names(): string[];
 
   is_static(): boolean;
 
@@ -43,8 +43,6 @@ declare class REMethodDefinition {
 }
 
 declare class REManagedObject {
-  [index: number]: any;
-
   call(method_name: string, ...args: any[]): any;
 
   get_type_definition(): RETypeDefinition;

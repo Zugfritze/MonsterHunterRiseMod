@@ -31,8 +31,4 @@ export class Utils {
     const methodDef = sdk.find_type_definition(typeName).get_method(methodName);
     sdk.hook(methodDef, preFunction, postFunction);
   }
-
-  static getFieldNames<T extends object>(obj: T): Array<keyof T> {
-    return Object.keys(obj) as Array<keyof T>;
-  }
 }
