@@ -1,5 +1,7 @@
 import { ConfigManager } from "./ConfigManager";
-import { imgui_extra, KeysOfType, ReferenceType, Utils } from "./Utils";
+import { Utils } from "./Utils";
+import { imgui_extra } from "./Tools/imgui_extra";
+import { KeysOfType, ReferenceType } from "./Tools/Types";
 import ImGuiInputTextFlags = imgui_extra.ImGuiInputTextFlags;
 
 class CharacterConfig {

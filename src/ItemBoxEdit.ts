@@ -1,4 +1,4 @@
-import { imgui_extra } from "./Utils";
+import { imgui_extra } from "./Tools/imgui_extra";
 
 export class ItemBoxEdit {
   private static mo_data_manager: REManagedObject | undefined;

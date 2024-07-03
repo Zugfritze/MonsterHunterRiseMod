@@ -1,4 +1,4 @@
-import { KeysOfType } from "./Utils";
+import { KeysOfType } from "./Tools/Types";
 
 export class ConfigManager<T extends { [key: string]: any }> {
   private readonly configPath: string;

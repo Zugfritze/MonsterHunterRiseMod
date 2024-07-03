@@ -3,7 +3,7 @@ import { ItemBoxEdit } from "./ItemBoxEdit";
 import { InfiniteConsumables } from "./InfiniteConsumables";
 import { BuddySkillEdit } from "./BuddySkillEdit";
 import { Debug } from "./Debug";
-import { imgui_extra } from "./Utils";
+import { imgui_extra } from "./Tools/imgui_extra";
 import ImGuiWindowFlags = imgui_extra.ImGuiWindowFlags;
 
 class Main {

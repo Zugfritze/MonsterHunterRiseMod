@@ -1,5 +1,6 @@
 import { ConfigManager } from "./ConfigManager";
-import { KeysOfType, Utils } from "./Utils";
+import { KeysOfType } from "./Tools/Types";
+import { Utils } from "./Utils";
 
 class InfiniteConsumablesConfig {
   infiniteCoating: boolean = false;
