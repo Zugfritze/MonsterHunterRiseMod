@@ -11,10 +11,7 @@ class InfiniteConsumablesConfig {
 }
 
 export class InfiniteConsumables {
-  private static config = new ConfigManager(
-    "BPQSMHRMod/infinite_consumables.json",
-    new InfiniteConsumablesConfig(),
-  );
+  private static config = new ConfigManager("BPQSMHRMod/infinite_consumables.json", new InfiniteConsumablesConfig());
   private static uiConfigItems: {
     label: string;
     key: KeysOfType<InfiniteConsumablesConfig, boolean>;
@@ -29,10 +26,7 @@ export class InfiniteConsumables {
   static ui() {
     if (imgui.tree_node("无限消耗品")) {
       for (const item of this.uiConfigItems) {
-        const [changed, value] = imgui.checkbox(
-          item.label,
-          this.config.get(item.key),
-        );
+        const [changed, value] = imgui.checkbox(item.label, this.config.get(item.key));
         if (changed) {
           this.config.set(item.key, value);
         }
@@ -42,25 +36,17 @@ export class InfiniteConsumables {
   }
 
   static init_hook() {
-    Utils.hookMethod(
-      "snow.data.bulletSlider.BottleSliderFunc",
-      "consumeItem",
-      () => {
-        if (this.config.get("infiniteCoating")) {
-          return sdk.PreHookResult.SKIP_ORIGINAL;
-        }
-      },
-    );
+    Utils.hookMethod("snow.data.bulletSlider.BottleSliderFunc", "consumeItem", () => {
+      if (this.config.get("infiniteCoating")) {
+        return sdk.PreHookResult.SKIP_ORIGINAL;
+      }
+    });
 
-    Utils.hookMethod(
-      "snow.data.bulletSlider.BulletSliderFunc",
-      "consumeItem",
-      () => {
-        if (this.config.get("infiniteAmmo")) {
-          return sdk.PreHookResult.SKIP_ORIGINAL;
-        }
-      },
-    );
+    Utils.hookMethod("snow.data.bulletSlider.BulletSliderFunc", "consumeItem", () => {
+      if (this.config.get("infiniteAmmo")) {
+        return sdk.PreHookResult.SKIP_ORIGINAL;
+      }
+    });
 
     const isEcItem = (itemID: number): boolean => {
       return 69206016 <= itemID && itemID <= 69206038;
@@ -79,36 +65,28 @@ export class InfiniteConsumables {
       },
     );
 
-    Utils.hookMethod(
-      "snow.envCreature.EnvironmentCreatureManager",
-      "addEc057UseCount",
-      (args) => {
-        if (this.config.get("infiniteEndemicLife")) {
-          const playerBase = Utils.getPlayerBase();
-          if (playerBase.get_field("_PlayerIndex") == sdk.to_int64(args[3])) {
-            return sdk.PreHookResult.SKIP_ORIGINAL;
-          }
+    Utils.hookMethod("snow.envCreature.EnvironmentCreatureManager", "addEc057UseCount", (args) => {
+      if (this.config.get("infiniteEndemicLife")) {
+        const playerBase = Utils.getPlayerBase();
+        if (playerBase.get_field("_PlayerIndex") == sdk.to_int64(args[3])) {
+          return sdk.PreHookResult.SKIP_ORIGINAL;
         }
-      },
-    );
+      }
+    });
 
-    Utils.hookMethod(
-      "snow.player.fsm.PlayerFsm2ActionHunterWire",
-      "start",
-      () => {
-        if (this.config.get("infiniteWirebug")) {
-          const playerBase = Utils.getPlayerBase();
+    Utils.hookMethod("snow.player.fsm.PlayerFsm2ActionHunterWire", "start", () => {
+      if (this.config.get("infiniteWirebug")) {
+        const playerBase = Utils.getPlayerBase();
 
-          let wireGuages = playerBase.get_field("_HunterWireGauge");
-          if (wireGuages == null) return;
+        let wireGuages = playerBase.get_field("_HunterWireGauge");
+        if (wireGuages == null) return;
 
-          wireGuages = wireGuages.get_elements();
-          for (const gauge of wireGuages) {
-            gauge.set_field("_RecastTimer", 0);
-            gauge.set_field("_RecoverWaitTimer", 0);
-          }
+        wireGuages = wireGuages.get_elements();
+        for (const gauge of wireGuages) {
+          gauge.set_field("_RecastTimer", 0);
+          gauge.set_field("_RecoverWaitTimer", 0);
         }
-      },
-    );
+      }
+    });
   }
 }

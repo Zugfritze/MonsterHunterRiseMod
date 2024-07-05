@@ -36,13 +36,7 @@ class Main {
         this.drawWindow = !this.drawWindow;
       }
       if (this.drawWindow) {
-        if (
-          imgui.begin_window(
-            "半瓶气水-MHR",
-            true,
-            ImGuiWindowFlags.AlwaysAutoResize,
-          )
-        ) {
+        if (imgui.begin_window("半瓶气水-MHR", true, ImGuiWindowFlags.AlwaysAutoResize)) {
           Character.ui();
           ItemBoxEdit.ui();
           InfiniteConsumables.ui();

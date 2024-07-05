@@ -31,8 +31,7 @@ class TypeOptions {
 }
 
 export class Debug {
-  private static TypeDefinitions: Map<RETypeDefinition, TypeOptions> =
-    new Map();
+  private static TypeDefinitions: Map<RETypeDefinition, TypeOptions> = new Map();
 
   static add_TypeDefinition(TypeDefinition: RETypeDefinition) {
     if (this.TypeDefinitions.has(TypeDefinition)) {
@@ -48,20 +47,13 @@ export class Debug {
           const fields = TypeDefinition.get_fields();
           const field_category_options = TypeOptions.field;
           if (fields.length > 0 && imgui.tree_node("字段")) {
-            const [staticFieldArray, instanceFieldArray] =
-              this.partitionByStatic(fields);
+            const [staticFieldArray, instanceFieldArray] = this.partitionByStatic(fields);
             if (staticFieldArray.length > 0 && imgui.tree_node("静态")) {
-              this.fieldTableUI(
-                staticFieldArray,
-                field_category_options.static,
-              );
+              this.fieldTableUI(staticFieldArray, field_category_options.static);
               imgui.tree_pop();
             }
             if (instanceFieldArray.length > 0 && imgui.tree_node("非静态")) {
-              this.fieldTableUI(
-                instanceFieldArray,
-                field_category_options.instance,
-              );
+              this.fieldTableUI(instanceFieldArray, field_category_options.instance);
               imgui.tree_pop();
             }
             imgui.tree_pop();
@@ -70,20 +62,13 @@ export class Debug {
           const methods = TypeDefinition.get_methods();
           const method_category_options = TypeOptions.method;
           if (methods.length > 0 && imgui.tree_node("方法")) {
-            const [staticMethodArray, instanceMethodArray] =
-              this.partitionByStatic(methods);
+            const [staticMethodArray, instanceMethodArray] = this.partitionByStatic(methods);
             if (staticMethodArray.length > 0 && imgui.tree_node("静态")) {
-              this.methodTableUI(
-                staticMethodArray,
-                method_category_options.static,
-              );
+              this.methodTableUI(staticMethodArray, method_category_options.static);
               imgui.tree_pop();
             }
             if (instanceMethodArray.length > 0 && imgui.tree_node("非静态")) {
-              this.methodTableUI(
-                instanceMethodArray,
-                method_category_options.instance,
-              );
+              this.methodTableUI(instanceMethodArray, method_category_options.instance);
               imgui.tree_pop();
             }
             imgui.tree_pop();
@@ -95,9 +80,7 @@ export class Debug {
     }
   }
 
-  private static partitionByStatic<T extends { is_static(): boolean }>(
-    param: T[],
-  ): [T[], T[]] {
+  private static partitionByStatic<T extends { is_static(): boolean }>(param: T[]): [T[], T[]] {
     const staticArray: T[] = [];
     const instanceArray: T[] = [];
     for (const method of param) {
@@ -110,10 +93,7 @@ export class Debug {
     return [staticArray, instanceArray];
   }
 
-  private static fieldTableUI(
-    fieldList: REField[],
-    field_Options: FieldOptions,
-  ) {
+  private static fieldTableUI(fieldList: REField[], field_Options: FieldOptions) {
     Components.searchAndCheckboxes("搜索", field_Options, [
       { key: "searchByName", label: "搜索字段名" },
       { key: "searchByType", label: "搜索字段类型", same_line: true },
@@ -131,10 +111,8 @@ export class Debug {
 
         if (
           field_Options.searchText == "" ||
-          (field_Options.searchByName &&
-            field_name.includes(field_Options.searchText)) ||
-          (field_Options.searchByType &&
-            field_type_names.includes(field_Options.searchText))
+          (field_Options.searchByName && field_name.includes(field_Options.searchText)) ||
+          (field_Options.searchByType && field_type_names.includes(field_Options.searchText))
         ) {
           imgui.table_next_row();
           imgui.table_set_column_index(0);
@@ -147,10 +125,7 @@ export class Debug {
     }
   }
 
-  private static methodTableUI(
-    methodList: REMethodDefinition[],
-    method_Options: MethodOptions,
-  ) {
+  private static methodTableUI(methodList: REMethodDefinition[], method_Options: MethodOptions) {
     Components.searchAndCheckboxes("搜索", method_Options, [
       { key: "searchByMethodName", label: "搜索方法名" },
       { key: "searchByParamTypes", label: "搜索方法参数", same_line: true },
@@ -171,18 +146,13 @@ export class Debug {
           .get_param_types()
           .map((param) => param.get_full_name())
           .join(", ");
-        const method_return_type_name = method
-          .get_return_type()
-          .get_full_name();
+        const method_return_type_name = method.get_return_type().get_full_name();
 
         if (
           method_Options.searchText === "" ||
-          (method_Options.searchByMethodName &&
-            method_name.includes(method_Options.searchText)) ||
-          (method_Options.searchByParamTypes &&
-            method_param_type_names.includes(method_Options.searchText)) ||
-          (method_Options.searchByReturnType &&
-            method_return_type_name.includes(method_Options.searchText))
+          (method_Options.searchByMethodName && method_name.includes(method_Options.searchText)) ||
+          (method_Options.searchByParamTypes && method_param_type_names.includes(method_Options.searchText)) ||
+          (method_Options.searchByReturnType && method_return_type_name.includes(method_Options.searchText))
         ) {
           imgui.table_next_row();
           imgui.table_set_column_index(0);

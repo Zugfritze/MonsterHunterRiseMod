@@ -4,8 +4,7 @@ export class Utils {
   static getPlayerBase(): REManagedObject {
     if (this.playerInput == undefined) {
       const inputManager = sdk.get_managed_singleton("snow.StmInputManager");
-      const inGameInputDevice: REManagedObject =
-        inputManager.get_field("_InGameInputDevice");
+      const inGameInputDevice: REManagedObject = inputManager.get_field("_InGameInputDevice");
       this.playerInput = inGameInputDevice.get_field("_pl_input");
     }
     return this.playerInput!.get_field("RefPlayer");

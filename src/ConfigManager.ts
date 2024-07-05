@@ -1,12 +1,7 @@
 import { ExcludeKeysOfTypeOrSubtype, KeysOfType } from "./Tools/Types";
-import {
-  ITypeSafeAccessor,
-  TypeSafeAccessorProxy,
-} from "./Tools/TypeSafeAccessor";
+import { ITypeSafeAccessor, TypeSafeAccessorProxy } from "./Tools/TypeSafeAccessor";
 
-export class ConfigManager<T extends { [key: string]: any }>
-  implements ITypeSafeAccessor<T>
-{
+export class ConfigManager<T extends { [key: string]: any }> implements ITypeSafeAccessor<T> {
   private readonly configPath: string;
   private config: T;
   private readonly defaultConfig: T;
@@ -21,25 +16,15 @@ export class ConfigManager<T extends { [key: string]: any }>
   get<K extends keyof T>(key: K): T[K];
   get<V>(key: Extract<keyof T, KeysOfType<T, V>>): V;
   get<K extends keyof T>(key: K): T[K] {
-    return this.config[key] != undefined
-      ? this.config[key]
-      : this.defaultConfig[key];
+    return this.config[key] != undefined ? this.config[key] : this.defaultConfig[key];
   }
 
-  getAccessor<K extends ExcludeKeysOfTypeOrSubtype<T, ITypeSafeAccessor<T[K]>>>(
-    key: K,
-  ): ITypeSafeAccessor<T[K]>;
+  getAccessor<K extends ExcludeKeysOfTypeOrSubtype<T, ITypeSafeAccessor<T[K]>>>(key: K): ITypeSafeAccessor<T[K]>;
   getAccessor<V extends T[ExcludeKeysOfTypeOrSubtype<T, ITypeSafeAccessor<V>>]>(
     key: Extract<keyof T, KeysOfType<T, V>>,
   ): ITypeSafeAccessor<V>;
-  getAccessor<K extends ExcludeKeysOfTypeOrSubtype<T, ITypeSafeAccessor<T[K]>>>(
-    key: K,
-  ): ITypeSafeAccessor<T[K]> {
-    return new TypeSafeAccessorProxy(
-      this.config[key] != undefined
-        ? this.config[key]
-        : this.defaultConfig[key],
-    );
+  getAccessor<K extends ExcludeKeysOfTypeOrSubtype<T, ITypeSafeAccessor<T[K]>>>(key: K): ITypeSafeAccessor<T[K]> {
+    return new TypeSafeAccessorProxy(this.config[key] != undefined ? this.config[key] : this.defaultConfig[key]);
   }
 
   set<K extends keyof T>(key: K, value: T[K]): void;

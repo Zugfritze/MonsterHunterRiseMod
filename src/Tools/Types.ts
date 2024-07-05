@@ -1,11 +1,4 @@
-export type PrimitiveType =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | symbol
-  | bigint;
+export type PrimitiveType = string | number | boolean | null | undefined | symbol | bigint;
 
 export class ReferenceType<T extends PrimitiveType> {
   value: T;
@@ -20,21 +13,9 @@ export type KeysOfType<T, V> = {
 }[keyof T];
 
 export type KeysOfTypeOrSubtype<T, I> = {
-  [K in keyof T]: T[K] extends I
-    ? K
-    : T[K] extends infer U
-      ? U extends I
-        ? K
-        : never
-      : never;
+  [K in keyof T]: T[K] extends I ? K : T[K] extends infer U ? (U extends I ? K : never) : never;
 }[keyof T];
 
 export type ExcludeKeysOfTypeOrSubtype<T, I> = {
-  [K in keyof T]: T[K] extends I
-    ? never
-    : T[K] extends infer U
-      ? U extends I
-        ? never
-        : K
-      : K;
+  [K in keyof T]: T[K] extends I ? never : T[K] extends infer U ? (U extends I ? never : K) : K;
 }[keyof T];

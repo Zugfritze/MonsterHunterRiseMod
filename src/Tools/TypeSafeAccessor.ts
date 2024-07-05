@@ -5,9 +5,7 @@ export interface ITypeSafeAccessor<T> {
 
   get<V>(key: Extract<keyof T, KeysOfType<T, V>>): V;
 
-  getAccessor<K extends ExcludeKeysOfTypeOrSubtype<T, ITypeSafeAccessor<T[K]>>>(
-    key: K,
-  ): ITypeSafeAccessor<T[K]>;
+  getAccessor<K extends ExcludeKeysOfTypeOrSubtype<T, ITypeSafeAccessor<T[K]>>>(key: K): ITypeSafeAccessor<T[K]>;
 
   getAccessor<V extends T[ExcludeKeysOfTypeOrSubtype<T, ITypeSafeAccessor<V>>]>(
     key: Extract<keyof T, KeysOfType<T, V>>,
@@ -18,24 +16,22 @@ export interface ITypeSafeAccessor<T> {
   set<V>(key: Extract<keyof T, KeysOfType<T, V>>, value: V): void;
 }
 
-export abstract class TypeSafeAccessor
-  implements ITypeSafeAccessor<TypeSafeAccessor>
-{
+export abstract class TypeSafeAccessor implements ITypeSafeAccessor<TypeSafeAccessor> {
   get<K extends keyof this>(key: K): this[K];
   get<V>(key: Extract<keyof this, KeysOfType<this, V>>): V;
   get<K extends keyof this>(key: K): this[K] {
     return this[key];
   }
 
-  getAccessor<
-    K extends ExcludeKeysOfTypeOrSubtype<this, ITypeSafeAccessor<this[K]>>,
-  >(key: K): ITypeSafeAccessor<this[K]>;
-  getAccessor<
-    V extends this[ExcludeKeysOfTypeOrSubtype<this, ITypeSafeAccessor<V>>],
-  >(key: Extract<keyof this, KeysOfType<this, V>>): ITypeSafeAccessor<V>;
-  getAccessor<
-    K extends ExcludeKeysOfTypeOrSubtype<this, ITypeSafeAccessor<this[K]>>,
-  >(key: K): ITypeSafeAccessor<this[K]> {
+  getAccessor<K extends ExcludeKeysOfTypeOrSubtype<this, ITypeSafeAccessor<this[K]>>>(
+    key: K,
+  ): ITypeSafeAccessor<this[K]>;
+  getAccessor<V extends this[ExcludeKeysOfTypeOrSubtype<this, ITypeSafeAccessor<V>>]>(
+    key: Extract<keyof this, KeysOfType<this, V>>,
+  ): ITypeSafeAccessor<V>;
+  getAccessor<K extends ExcludeKeysOfTypeOrSubtype<this, ITypeSafeAccessor<this[K]>>>(
+    key: K,
+  ): ITypeSafeAccessor<this[K]> {
     return new TypeSafeAccessorProxy(this[key]);
   }
 
@@ -59,15 +55,11 @@ export class TypeSafeAccessorProxy<T> implements ITypeSafeAccessor<T> {
     return this.object[key];
   }
 
-  getAccessor<K extends ExcludeKeysOfTypeOrSubtype<T, ITypeSafeAccessor<T[K]>>>(
-    key: K,
-  ): ITypeSafeAccessor<T[K]>;
+  getAccessor<K extends ExcludeKeysOfTypeOrSubtype<T, ITypeSafeAccessor<T[K]>>>(key: K): ITypeSafeAccessor<T[K]>;
   getAccessor<V extends T[ExcludeKeysOfTypeOrSubtype<T, ITypeSafeAccessor<V>>]>(
     key: Extract<keyof T, KeysOfType<T, V>>,
   ): ITypeSafeAccessor<V>;
-  getAccessor<K extends ExcludeKeysOfTypeOrSubtype<T, ITypeSafeAccessor<T[K]>>>(
-    key: K,
-  ): ITypeSafeAccessor<T[K]> {
+  getAccessor<K extends ExcludeKeysOfTypeOrSubtype<T, ITypeSafeAccessor<T[K]>>>(key: K): ITypeSafeAccessor<T[K]> {
     return new TypeSafeAccessorProxy(this.object[key]);
   }
 

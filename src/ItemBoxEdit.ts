@@ -1,4 +1,5 @@
 import { imgui_extra } from "./Tools/imgui_extra";
+import { Debug } from "./Debug";
 import ImGuiTableFlags = imgui_extra.ImGuiTableFlags;
 import Components = imgui_extra.Components;
 
@@ -31,17 +32,15 @@ export class ItemBoxEdit {
     if (t_data_shortcut == undefined) {
       return false;
     }
+    Debug.add_TypeDefinition(t_data_shortcut);
 
-    this.m_get_item_name = t_data_shortcut.get_method(
-      "getName(snow.data.ContentsIdSystem.ItemId)",
-    );
+    this.m_get_item_name = t_data_shortcut.get_method("getName(snow.data.ContentsIdSystem.ItemId)");
     return this.m_get_item_name != undefined;
   }
 
   static ui() {
     if (imgui.tree_node("物品箱编辑")) {
-      const items: REManagedObject =
-        this.mo_item_box!.get_field("_InventoryList");
+      const items: REManagedObject = this.mo_item_box!.get_field("_InventoryList");
       const items_count: number = items.call("get_Count");
 
       Components.searchAndCheckboxes("搜索", this.searchOptions, [
@@ -76,12 +75,9 @@ export class ItemBoxEdit {
             (this.searchOptions.searchText == "" ||
               (this.searchOptions.searchByItemBoxSlot &&
                 item_box_slot_string.includes(this.searchOptions.searchText)) ||
-              (this.searchOptions.searchByItemID &&
-                item_id_string.includes(this.searchOptions.searchText)) ||
-              (this.searchOptions.searchByItemName &&
-                item_name.includes(this.searchOptions.searchText)) ||
-              (this.searchOptions.searchByItemAmt &&
-                item_amt_string.includes(this.searchOptions.searchText)))
+              (this.searchOptions.searchByItemID && item_id_string.includes(this.searchOptions.searchText)) ||
+              (this.searchOptions.searchByItemName && item_name.includes(this.searchOptions.searchText)) ||
+              (this.searchOptions.searchByItemAmt && item_amt_string.includes(this.searchOptions.searchText)))
           ) {
             imgui.table_next_row();
             imgui.table_set_column_index(0);
@@ -103,36 +99,23 @@ export class ItemBoxEdit {
         imgui.end_table();
       }
 
-      const [Item_box_slot_changed, Item_box_slot_value] =
-        imgui_extra.input_number("物品箱槽位", this.Item_box_slot, [
-          1,
-          items_count,
-        ]);
+      const [Item_box_slot_changed, Item_box_slot_value] = imgui_extra.input_number("物品箱槽位", this.Item_box_slot, [
+        1,
+        items_count,
+      ]);
       if (Item_box_slot_changed) {
         this.Item_box_slot = Item_box_slot_value;
       }
-      const item: REManagedObject = items.call(
-        "get_Item",
-        this.Item_box_slot - 1,
-      );
+      const item: REManagedObject = items.call("get_Item", this.Item_box_slot - 1);
       const item_data: REManagedObject = item.get_field("_ItemCount");
       const item_data_id: number = item_data.get_field("_Id");
       if (item_data_id == 67108864) {
         imgui.text("这个槽位是空的");
       } else {
-        const item_name: string = this.m_get_item_name!.call(
-          null,
-          item_data_id,
-        );
+        const item_name: string = this.m_get_item_name!.call(null, item_data_id);
         const item_data_amt: number = item_data.get_field("_Num");
-        imgui.text(
-          `物品ID: ${item_data_id} 名称: ${item_name} 数量: ${item_data_amt}`,
-        );
-        const [Item_amt_changed, Item_amt_value] = imgui_extra.input_number(
-          "物品数量",
-          this.Item_amt,
-          [1, 9999],
-        );
+        imgui.text(`物品ID: ${item_data_id} 名称: ${item_name} 数量: ${item_data_amt}`);
+        const [Item_amt_changed, Item_amt_value] = imgui_extra.input_number("物品数量", this.Item_amt, [1, 9999]);
         if (Item_amt_changed) {
           this.Item_amt = Item_amt_value;
         }

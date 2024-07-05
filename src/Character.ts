@@ -11,10 +11,7 @@ class CharacterConfig {
 }
 
 export class Character {
-  private static config = new ConfigManager(
-    "BPQSMHRMod/character.json",
-    new CharacterConfig(),
-  );
+  private static config = new ConfigManager("BPQSMHRMod/character.json", new CharacterConfig());
   private static lastTime: number = os.time();
   private static uiConfigItems: {
     label: string;
@@ -116,9 +113,7 @@ export class Character {
           const vitalMax: number = playerData.get_field("_vitalMax");
           const healAmount = vitalMax * (percentage / 100);
           const currentVital: number = playerData.call("get_vital");
-          const newVital = Math.floor(
-            Math.min(currentVital + healAmount, vitalMax) + 0.5,
-          );
+          const newVital = Math.floor(Math.min(currentVital + healAmount, vitalMax) + 0.5);
           playerData.set_field("_r_Vital", newVital);
           playerData.call("set__vital", newVital + 0.10001);
         }

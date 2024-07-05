@@ -8,11 +8,7 @@ export namespace imgui_extra {
     is_float: boolean = false,
     flags?: ImGuiInputTextFlags | number,
   ): [boolean, number] {
-    const [changed, value_string] = imgui.input_text(
-      label,
-      value.toString(),
-      flags,
-    );
+    const [changed, value_string] = imgui.input_text(label, value.toString(), flags);
     if (changed) {
       let value_number: number | undefined;
       if (is_float) {
@@ -136,10 +132,7 @@ export namespace imgui_extra {
     SortTristate = 1 << 27,
 
     // Internal
-    SizingMask_ = SizingFixedFit |
-      SizingFixedSame |
-      SizingStretchProp |
-      SizingStretchSame,
+    SizingMask_ = SizingFixedFit | SizingFixedSame | SizingStretchProp | SizingStretchSame,
   }
 
   export namespace Components {
@@ -157,10 +150,30 @@ export namespace imgui_extra {
         if (same_line != undefined && same_line) {
           imgui.same_line();
         }
-        options[key] = imgui.checkbox(
-          label,
-          options[key] as boolean,
-        )[1] as T[typeof key];
+        options[key] = imgui.checkbox(label, options[key] as boolean)[1] as T[typeof key];
+      }
+    }
+
+    export type TableConfig<T> = { key: string; label: string; display: (index: number, data: T) => void }[];
+
+    export function table<T>(tableId: string, data: T[], config: TableConfig<T>) {
+      if (imgui.begin_table(tableId, config.length, ImGuiTableFlags.Borders)) {
+        for (const configItem of config) {
+          imgui.table_setup_column(configItem.label);
+        }
+        imgui.table_headers_row();
+
+        for (let index = 0; index < data.length; index++) {
+          const dataItem = data[index];
+          imgui.table_next_row();
+
+          for (let i = 0; i < config.length; i++) {
+            const configItem = config[i];
+            imgui.table_set_column_index(i);
+            configItem.display(index, dataItem);
+          }
+        }
+        imgui.end_table();
       }
     }
   }

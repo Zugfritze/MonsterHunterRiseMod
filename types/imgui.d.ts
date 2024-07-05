@@ -14,16 +14,9 @@ declare namespace imgui {
 
   function text(text: string): void;
 
-  function checkbox(
-    label: string,
-    value: boolean,
-  ): LuaMultiReturn<[boolean, boolean]>;
+  function checkbox(label: string, value: boolean): LuaMultiReturn<[boolean, boolean]>;
 
-  function input_text(
-    label: string,
-    value: string,
-    flags?: number,
-  ): LuaMultiReturn<[boolean, string, number, number]>;
+  function input_text(label: string, value: string, flags?: number): LuaMultiReturn<[boolean, string, number, number]>;
 
   function tree_node(label: string): boolean;
 
@@ -33,11 +26,7 @@ declare namespace imgui {
 
   function separator(): void;
 
-  function load_font(
-    filepath: string,
-    size: number,
-    ranges: [number, number, number],
-  ): FontIndex;
+  function load_font(filepath: string, size: number, ranges: [number, number, number]): FontIndex;
 
   function push_font(font: FontIndex): void;
 
@@ -64,12 +53,7 @@ declare namespace imgui {
 
   function table_set_column_index(column_index: number): boolean;
 
-  function table_setup_column(
-    label: string,
-    flags?: number,
-    init_width_or_weight?: number,
-    user_id?: number,
-  ): void;
+  function table_setup_column(label: string, flags?: number, init_width_or_weight?: number, user_id?: number): void;
 
   function table_setup_scroll_freeze(cols: number, rows: number): void;
 

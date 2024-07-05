@@ -7,3 +7,10 @@
 npm install
 npm run build
 ```
+
+## TypeScriptToLua的限制
+
+不支持在静态字段/字段(不确定)中使用this<br>
+不支持使用get属性作为参数<br>
+不支持继承Array<类型><br>
+不支持使用new Array<类型>创建Array只能使用[]加类型注解创建
