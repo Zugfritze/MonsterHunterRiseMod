@@ -1,15 +1,18 @@
 import { imgui_extra } from "./Tools/imgui_extra";
 import ImGuiTableFlags = imgui_extra.ImGuiTableFlags;
+import Components = imgui_extra.Components;
 
 export class ItemBoxEdit {
   private static mo_data_manager: REManagedObject | undefined;
   private static mo_item_box: REManagedObject | undefined;
   private static m_get_item_name: REMethodDefinition | undefined;
-  private static searchText: string = "";
-  private static searchByItemBoxSlot: boolean = true;
-  private static searchByItemID: boolean = true;
-  private static searchByItemName: boolean = true;
-  private static searchByItemAmt: boolean = true;
+  private static searchOptions = {
+    searchText: "",
+    searchByItemBoxSlot: true,
+    searchByItemID: true,
+    searchByItemName: true,
+    searchByItemAmt: true,
+  };
   private static Item_box_slot: number = 1;
   private static Item_amt: number = 1;
 
@@ -41,26 +44,12 @@ export class ItemBoxEdit {
         this.mo_item_box!.get_field("_InventoryList");
       const items_count: number = items.call("get_Count");
 
-      this.searchText = imgui.input_text("搜索", this.searchText)[1];
-      this.searchByItemBoxSlot = imgui.checkbox(
-        "搜索槽位",
-        this.searchByItemBoxSlot,
-      )[1];
-      imgui.same_line();
-      this.searchByItemID = imgui.checkbox(
-        "搜索物品ID",
-        this.searchByItemID,
-      )[1];
-      imgui.same_line();
-      this.searchByItemName = imgui.checkbox(
-        "搜索物品名称",
-        this.searchByItemName,
-      )[1];
-      imgui.same_line();
-      this.searchByItemAmt = imgui.checkbox(
-        "搜索物品数量",
-        this.searchByItemAmt,
-      )[1];
+      Components.searchAndCheckboxes("搜索", this.searchOptions, [
+        { key: "searchByItemBoxSlot", label: "搜索槽位" },
+        { key: "searchByItemID", label: "搜索物品ID", same_line: true },
+        { key: "searchByItemName", label: "搜索物品名称", same_line: true },
+        { key: "searchByItemAmt", label: "搜索物品数量", same_line: true },
+      ]);
 
       if (imgui.begin_table("物品箱表", 5, ImGuiTableFlags.Borders)) {
         imgui.table_setup_column("槽位");
@@ -84,14 +73,15 @@ export class ItemBoxEdit {
 
           if (
             item_id != 67108864 &&
-            (this.searchText == "" ||
-              (this.searchByItemBoxSlot &&
-                item_box_slot_string.includes(this.searchText)) ||
-              (this.searchByItemID &&
-                item_id_string.includes(this.searchText)) ||
-              (this.searchByItemName && item_name.includes(this.searchText)) ||
-              (this.searchByItemAmt &&
-                item_amt_string.includes(this.searchText)))
+            (this.searchOptions.searchText == "" ||
+              (this.searchOptions.searchByItemBoxSlot &&
+                item_box_slot_string.includes(this.searchOptions.searchText)) ||
+              (this.searchOptions.searchByItemID &&
+                item_id_string.includes(this.searchOptions.searchText)) ||
+              (this.searchOptions.searchByItemName &&
+                item_name.includes(this.searchOptions.searchText)) ||
+              (this.searchOptions.searchByItemAmt &&
+                item_amt_string.includes(this.searchOptions.searchText)))
           ) {
             imgui.table_next_row();
             imgui.table_set_column_index(0);

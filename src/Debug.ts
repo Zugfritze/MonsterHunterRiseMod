@@ -1,5 +1,6 @@
 import { imgui_extra } from "./Tools/imgui_extra";
 import ImGuiTableFlags = imgui_extra.ImGuiTableFlags;
+import Components = imgui_extra.Components;
 
 class FieldOptions {
   searchText: string = "";
@@ -113,19 +114,10 @@ export class Debug {
     fieldList: REField[],
     field_Options: FieldOptions,
   ) {
-    field_Options.searchText = imgui.input_text(
-      "搜索",
-      field_Options.searchText,
-    )[1];
-    field_Options.searchByName = imgui.checkbox(
-      "搜索字段名",
-      field_Options.searchByName,
-    )[1];
-    imgui.same_line();
-    field_Options.searchByType = imgui.checkbox(
-      "搜索字段类型",
-      field_Options.searchByType,
-    )[1];
+    Components.searchAndCheckboxes("搜索", field_Options, [
+      { key: "searchByName", label: "搜索字段名" },
+      { key: "searchByType", label: "搜索字段类型", same_line: true },
+    ]);
 
     if (imgui.begin_table("字段表", 2, ImGuiTableFlags.Borders)) {
       imgui.table_setup_column("字段名");
@@ -159,24 +151,11 @@ export class Debug {
     methodList: REMethodDefinition[],
     method_Options: MethodOptions,
   ) {
-    method_Options.searchText = imgui.input_text(
-      "搜索",
-      method_Options.searchText,
-    )[1];
-    method_Options.searchByMethodName = imgui.checkbox(
-      "搜索方法名",
-      method_Options.searchByMethodName,
-    )[1];
-    imgui.same_line();
-    method_Options.searchByParamTypes = imgui.checkbox(
-      "搜索方法参数",
-      method_Options.searchByParamTypes,
-    )[1];
-    imgui.same_line();
-    method_Options.searchByReturnType = imgui.checkbox(
-      "搜索方法返回值",
-      method_Options.searchByReturnType,
-    )[1];
+    Components.searchAndCheckboxes("搜索", method_Options, [
+      { key: "searchByMethodName", label: "搜索方法名" },
+      { key: "searchByParamTypes", label: "搜索方法参数", same_line: true },
+      { key: "searchByReturnType", label: "搜索方法返回值", same_line: true },
+    ]);
 
     if (imgui.begin_table("方法表", 3, ImGuiTableFlags.Borders)) {
       imgui.table_setup_column("方法名");

@@ -1,3 +1,5 @@
+import { KeysOfType } from "./Types";
+
 export namespace imgui_extra {
   export function input_number(
     label: string,
@@ -138,5 +140,28 @@ export namespace imgui_extra {
       SizingFixedSame |
       SizingStretchProp |
       SizingStretchSame,
+  }
+
+  export namespace Components {
+    export function searchAndCheckboxes<T extends { searchText: string }>(
+      searchLabel: string,
+      options: T,
+      checkboxOptions: {
+        key: Extract<keyof T, KeysOfType<T, boolean>>;
+        label: string;
+        same_line?: boolean;
+      }[],
+    ) {
+      options.searchText = imgui.input_text(searchLabel, options.searchText)[1];
+      for (const { key, label, same_line } of checkboxOptions) {
+        if (same_line != undefined && same_line) {
+          imgui.same_line();
+        }
+        options[key] = imgui.checkbox(
+          label,
+          options[key] as boolean,
+        )[1] as T[typeof key];
+      }
+    }
   }
 }
