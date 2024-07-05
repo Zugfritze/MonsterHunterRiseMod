@@ -157,10 +157,11 @@ export class Debug {
       { key: "searchByReturnType", label: "搜索方法返回值", same_line: true },
     ]);
 
-    if (imgui.begin_table("方法表", 3, ImGuiTableFlags.Borders)) {
+    if (imgui.begin_table("方法表", 4, ImGuiTableFlags.Borders)) {
       imgui.table_setup_column("方法名");
       imgui.table_setup_column("方法参数");
       imgui.table_setup_column("方法返回值");
+      imgui.table_setup_column("备注");
 
       imgui.table_headers_row();
 
@@ -190,6 +191,17 @@ export class Debug {
           imgui.text(method_param_type_names);
           imgui.table_set_column_index(2);
           imgui.text(method_return_type_name);
+          imgui.table_set_column_index(3);
+          switch (method_name) {
+            case ".cctor":
+              imgui.text("静态构造函数");
+              break;
+            case ".ctor":
+              imgui.text("构造函数");
+              break;
+            default:
+              imgui.text("");
+          }
         }
       }
       imgui.end_table();
