@@ -36,30 +36,24 @@ export class Debug {
     {
       key: "field_name",
       label: "字段名",
-      display(_index, data) {
-        imgui.text(data.get_name());
-      },
+      display: (_index, data) => imgui.text(data.get_name()),
     },
     {
       key: "field_type",
       label: "字段类型",
-      display(_index, data) {
-        imgui.text(data.get_type().get_full_name());
-      },
+      display: (_index, data) => imgui.text(data.get_type().get_full_name()),
     },
   ];
   private static MethodTableConfig: TableConfig<REMethodDefinition> = [
     {
       key: "method_name",
       label: "方法名",
-      display(_index, data) {
-        imgui.text(data.get_name());
-      },
+      display: (_index, data) => imgui.text(data.get_name()),
     },
     {
       key: "method_param_type_names",
       label: "方法参数",
-      display(_index, data) {
+      display: (_index, data) => {
         imgui.text(
           data
             .get_param_types()
@@ -71,14 +65,12 @@ export class Debug {
     {
       key: "method_return_type_name",
       label: "方法返回值",
-      display(_index, data) {
-        imgui.text(data.get_return_type().get_full_name());
-      },
+      display: (_index, data) => imgui.text(data.get_return_type().get_full_name()),
     },
     {
       key: "method_notes",
       label: "备注",
-      display(_index, data) {
+      display: (_index, data) => {
         switch (data.get_name()) {
           case ".cctor":
             imgui.text("静态构造函数");

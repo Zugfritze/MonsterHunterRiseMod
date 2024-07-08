@@ -197,10 +197,7 @@ class OtSkillTable {
     {
       key: "ColorName",
       label: "技能颜色",
-      display: (_index, data) => {
-        const ColorName = OtSkillTable.OtSkillColorMap[data.IconColor] ?? data.IconColor.toString();
-        imgui.text(ColorName);
-      },
+      display: (_index, data) => imgui.text(OtSkillTable.OtSkillColorMap[data.IconColor] ?? data.IconColor.toString()),
     },
     { key: "Name", label: "技能名称", display: (_index, data) => imgui.text(data.Name) },
     {
@@ -238,9 +235,7 @@ export class BuddySkillEdit {
     {
       key: "ownerName",
       label: "拥有者",
-      display: (_index, data) => {
-        imgui.text(data.OwnerNames.join(","));
-      },
+      display: (_index, data) => imgui.text(data.OwnerNames.join(",")),
     },
     {
       key: "select",
