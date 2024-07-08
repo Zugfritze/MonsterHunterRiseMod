@@ -1,6 +1,6 @@
 import { imgui_extra } from "./Tools/imgui_extra";
-import ImGuiTableFlags = imgui_extra.ImGuiTableFlags;
 import Components = imgui_extra.Components;
+import TableConfig = imgui_extra.Components.TableConfig;
 
 class FieldOptions {
   searchText: string = "";
@@ -32,6 +32,66 @@ class TypeOptions {
 
 export class Debug {
   private static TypeDefinitions: Map<RETypeDefinition, TypeOptions> = new Map();
+  private static FieldTableConfig: TableConfig<REField> = [
+    {
+      key: "field_name",
+      label: "字段名",
+      display(_index, data) {
+        imgui.text(data.get_name());
+      },
+    },
+    {
+      key: "field_type",
+      label: "字段类型",
+      display(_index, data) {
+        imgui.text(data.get_type().get_full_name());
+      },
+    },
+  ];
+  private static MethodTableConfig: TableConfig<REMethodDefinition> = [
+    {
+      key: "method_name",
+      label: "方法名",
+      display(_index, data) {
+        imgui.text(data.get_name());
+      },
+    },
+    {
+      key: "method_param_type_names",
+      label: "方法参数",
+      display(_index, data) {
+        imgui.text(
+          data
+            .get_param_types()
+            .map((param) => param.get_full_name())
+            .join(", "),
+        );
+      },
+    },
+    {
+      key: "method_return_type_name",
+      label: "方法返回值",
+      display(_index, data) {
+        imgui.text(data.get_return_type().get_full_name());
+      },
+    },
+    {
+      key: "method_notes",
+      label: "备注",
+      display(_index, data) {
+        switch (data.get_name()) {
+          case ".cctor":
+            imgui.text("静态构造函数");
+            break;
+          case ".ctor":
+            imgui.text("构造函数");
+            break;
+          default:
+            imgui.text("");
+        }
+      },
+    },
+  ];
 
   static add_TypeDefinition(TypeDefinition: RETypeDefinition) {
     if (this.TypeDefinitions.has(TypeDefinition)) {
@@ -98,31 +158,16 @@ export class Debug {
       { key: "searchByName", label: "搜索字段名" },
       { key: "searchByType", label: "搜索字段类型", same_line: true },
     ]);
-
-    if (imgui.begin_table("字段表", 2, ImGuiTableFlags.Borders)) {
-      imgui.table_setup_column("字段名");
-      imgui.table_setup_column("字段类型");
-
-      imgui.table_headers_row();
-
-      for (const field of fieldList) {
-        const field_name = field.get_name();
-        const field_type_names = field.get_type().get_full_name();
-
-        if (
-          field_Options.searchText == "" ||
-          (field_Options.searchByName && field_name.includes(field_Options.searchText)) ||
-          (field_Options.searchByType && field_type_names.includes(field_Options.searchText))
-        ) {
-          imgui.table_next_row();
-          imgui.table_set_column_index(0);
-          imgui.text(field_name);
-          imgui.table_set_column_index(1);
-          imgui.text(field_type_names);
-        }
-      }
-      imgui.end_table();
-    }
+    const filterFieldList = fieldList.filter((field) => {
+      const field_name = field.get_name();
+      const field_type_names = field.get_type().get_full_name();
+      return (
+        field_Options.searchText == "" ||
+        (field_Options.searchByName && field_name.includes(field_Options.searchText)) ||
+        (field_Options.searchByType && field_type_names.includes(field_Options.searchText))
+      );
+    });
+    Components.table("字段表", filterFieldList, this.FieldTableConfig);
   }
 
   private static methodTableUI(methodList: REMethodDefinition[], method_Options: MethodOptions) {
@@ -131,50 +176,20 @@ export class Debug {
       { key: "searchByParamTypes", label: "搜索方法参数", same_line: true },
       { key: "searchByReturnType", label: "搜索方法返回值", same_line: true },
     ]);
-
-    if (imgui.begin_table("方法表", 4, ImGuiTableFlags.Borders)) {
-      imgui.table_setup_column("方法名");
-      imgui.table_setup_column("方法参数");
-      imgui.table_setup_column("方法返回值");
-      imgui.table_setup_column("备注");
-
-      imgui.table_headers_row();
-
-      for (const method of methodList) {
-        const method_name = method.get_name();
-        const method_param_type_names = method
-          .get_param_types()
-          .map((param) => param.get_full_name())
-          .join(", ");
-        const method_return_type_name = method.get_return_type().get_full_name();
-
-        if (
-          method_Options.searchText === "" ||
-          (method_Options.searchByMethodName && method_name.includes(method_Options.searchText)) ||
-          (method_Options.searchByParamTypes && method_param_type_names.includes(method_Options.searchText)) ||
-          (method_Options.searchByReturnType && method_return_type_name.includes(method_Options.searchText))
-        ) {
-          imgui.table_next_row();
-          imgui.table_set_column_index(0);
-          imgui.text(method_name);
-          imgui.table_set_column_index(1);
-          imgui.text(method_param_type_names);
-          imgui.table_set_column_index(2);
-          imgui.text(method_return_type_name);
-          imgui.table_set_column_index(3);
-          switch (method_name) {
-            case ".cctor":
-              imgui.text("静态构造函数");
-              break;
-            case ".ctor":
-              imgui.text("构造函数");
-              break;
-            default:
-              imgui.text("");
-          }
-        }
-      }
-      imgui.end_table();
-    }
+    const filterMethodList = methodList.filter((method) => {
+      const method_name = method.get_name();
+      const method_param_type_names = method
+        .get_param_types()
+        .map((param) => param.get_full_name())
+        .join(", ");
+      const method_return_type_name = method.get_return_type().get_full_name();
+      return (
+        method_Options.searchText === "" ||
+        (method_Options.searchByMethodName && method_name.includes(method_Options.searchText)) ||
+        (method_Options.searchByParamTypes && method_param_type_names.includes(method_Options.searchText)) ||
+        (method_Options.searchByReturnType && method_return_type_name.includes(method_Options.searchText))
+      );
+    });
+    Components.table("方法表", filterMethodList, this.MethodTableConfig);
   }
 }
