@@ -20,6 +20,8 @@ declare class REField {
   get_type(): RETypeDefinition;
 
   is_static(): boolean;
+
+  get_data(obj: any): any;
 }
 
 declare class REMethodDefinition {

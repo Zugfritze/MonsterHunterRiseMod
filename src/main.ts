@@ -17,10 +17,6 @@ class Main {
       return false;
     }
 
-    if (!ItemBoxEdit.init()) {
-      return false;
-    }
-
     Character.init_hook();
     InfiniteConsumables.init_hook();
 
