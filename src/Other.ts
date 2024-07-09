@@ -27,7 +27,7 @@ export class Other {
       this.lastSaveAt = os.time();
     });
     Utils.hookMethod("snow.SnowSaveService", "requestAutoSaveAll", () => {
-      if (os.difftime(this.lastSaveAt, os.time()) < this.config.get("autoSaveInterval")) {
+      if (os.difftime(os.time(), this.lastSaveAt) < this.config.get("autoSaveInterval")) {
         return sdk.PreHookResult.SKIP_ORIGINAL;
       }
     });
