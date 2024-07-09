@@ -24,8 +24,8 @@ export class Utils {
   static hookMethod(
     typeName: string,
     methodName: string,
-    preFunction?: (...args: any[]) => any,
-    postFunction?: (...args: any[]) => any,
+    preFunction?: (this: void, ...args: any[]) => any,
+    postFunction?: (this: void, ...args: any[]) => any,
   ): void {
     const methodDef = sdk.find_type_definition(typeName).get_method(methodName);
     sdk.hook(methodDef, preFunction, postFunction);

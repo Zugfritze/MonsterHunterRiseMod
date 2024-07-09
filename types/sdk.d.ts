@@ -8,8 +8,8 @@ declare namespace sdk {
 
   function hook(
     method_definition: REMethodDefinition,
-    pre_func?: (...args: any[]) => any,
-    post_func?: (...args: any[]) => any,
+    pre_func?: (this: void, ...args: any[]) => any,
+    post_func?: (this: void, ...args: any[]) => any,
     ignore_jmp?: boolean,
   ): void;
 
