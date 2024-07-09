@@ -39,6 +39,7 @@ class Main {
           ItemBoxEdit.ui();
           InfiniteConsumables.ui();
           BuddySkillEdit.ui();
+          Other.ui();
           Debug.ui();
           imgui.end_window();
         } else {
