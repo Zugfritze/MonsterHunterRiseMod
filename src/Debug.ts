@@ -30,8 +30,20 @@ class TypeOptions {
   method: MethodCategoryOptions = new MethodCategoryOptions();
 }
 
+interface MonitoringData {
+  key: string;
+  data: string;
+  time: number;
+}
+
 export class Debug {
+  private static MonitoringDataList: MonitoringData[] = [];
   private static TypeDefinitions: Map<RETypeDefinition, TypeOptions> = new Map();
+  private static MonitoringTableConfig: TableConfig<MonitoringData> = [
+    { key: "key", label: "Key", display: (_index, data) => imgui.text(data.key) },
+    { key: "data", label: "数据", display: (_index, data) => imgui.text(data.data) },
+    { key: "time", label: "时间", display: (_index, data) => imgui.text(os.date("%X", data.time)) },
+  ];
   private static FieldTableConfig: TableConfig<REField> = [
     {
       key: "field_name",
@@ -85,6 +97,15 @@ export class Debug {
     },
   ];
 
+  static Monitoring(key: string, data: string) {
+    const index = this.MonitoringDataList.findIndex((item) => item.key == key);
+    if (index == -1) {
+      this.MonitoringDataList.push({ key, data, time: os.time() });
+    } else {
+      this.MonitoringDataList[index] = { key, data, time: os.time() };
+    }
+  }
+
   static add_TypeDefinition(TypeDefinition: RETypeDefinition) {
     if (this.TypeDefinitions.has(TypeDefinition)) {
       return;
@@ -94,46 +115,52 @@ export class Debug {
 
   static ui() {
     imgui_extra.tree_node("调试", () => {
-      for (const [TypeDefinition, TypeOptions] of this.TypeDefinitions) {
-        imgui_extra.tree_node(TypeDefinition.get_full_name(), () => {
-          const fields = TypeDefinition.get_fields();
-          const field_category_options = TypeOptions.field;
-          if (fields.length > 0) {
-            imgui_extra.tree_node("字段", () => {
-              const [staticFieldArray, instanceFieldArray] = this.partitionByStatic(fields);
-              if (staticFieldArray.length > 0) {
-                imgui_extra.tree_node("静态", () => {
-                  this.fieldTableUI(staticFieldArray, field_category_options.static);
-                });
-              }
-              if (instanceFieldArray.length > 0) {
-                imgui_extra.tree_node("非静态", () => {
-                  this.fieldTableUI(instanceFieldArray, field_category_options.instance);
-                });
-              }
-            });
-          }
+      imgui_extra.tree_node("监视", () => {
+        imgui.text(`当前时间: ${os.date("%X")}`);
+        Components.table("监视表", this.MonitoringDataList, this.MonitoringTableConfig);
+      });
+      imgui_extra.tree_node("类型定义", () => {
+        for (const [TypeDefinition, TypeOptions] of this.TypeDefinitions) {
+          imgui_extra.tree_node(TypeDefinition.get_full_name(), () => {
+            const fields = TypeDefinition.get_fields();
+            const field_category_options = TypeOptions.field;
+            if (fields.length > 0) {
+              imgui_extra.tree_node("字段", () => {
+                const [staticFieldArray, instanceFieldArray] = this.partitionByStatic(fields);
+                if (staticFieldArray.length > 0) {
+                  imgui_extra.tree_node("静态", () => {
+                    this.fieldTableUI(staticFieldArray, field_category_options.static);
+                  });
+                }
+                if (instanceFieldArray.length > 0) {
+                  imgui_extra.tree_node("非静态", () => {
+                    this.fieldTableUI(instanceFieldArray, field_category_options.instance);
+                  });
+                }
+              });
+            }
 
-          const methods = TypeDefinition.get_methods();
-          const method_category_options = TypeOptions.method;
-          if (methods.length > 0) {
-            imgui_extra.tree_node("方法", () => {
-              const [staticMethodArray, instanceMethodArray] = this.partitionByStatic(methods);
+            const methods = TypeDefinition.get_methods();
+            const method_category_options = TypeOptions.method;
+            if (methods.length > 0) {
+              imgui_extra.tree_node("方法", () => {
+                const [staticMethodArray, instanceMethodArray] = this.partitionByStatic(methods);
 
-              if (staticMethodArray.length > 0) {
-                imgui_extra.tree_node("静态", () => {
-                  this.methodTableUI(staticMethodArray, method_category_options.static);
-                });
-              }
-              if (instanceMethodArray.length > 0) {
-                imgui_extra.tree_node("非静态", () => {
-                  this.methodTableUI(instanceMethodArray, method_category_options.instance);
-                });
-              }
-            });
-          }
-        });
-      }
+                if (staticMethodArray.length > 0) {
+                  imgui_extra.tree_node("静态", () => {
+                    this.methodTableUI(staticMethodArray, method_category_options.static);
+                  });
+                }
+                if (instanceMethodArray.length > 0) {
+                  imgui_extra.tree_node("非静态", () => {
+                    this.methodTableUI(instanceMethodArray, method_category_options.instance);
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
     });
   }
 
