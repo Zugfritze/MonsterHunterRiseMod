@@ -41,30 +41,14 @@ export class ItemBoxEdit {
   private static Item_box_slot: number = 0;
   private static Item_amt: number = 1;
   private static TableConfig: TableConfig<ItemData> = [
-    {
-      key: "Slot",
-      label: "槽位",
-      display: (_index, data) => imgui.text(data.Index.toString()),
-    },
-    {
-      key: "Id",
-      label: "物品ID",
-      display: (_index, itemData) => imgui.text(itemData.get_id().toString()),
-    },
-    {
-      key: "Name",
-      label: "物品名称",
-      display: (_index, itemData) => imgui.text(itemData.get_name()),
-    },
-    {
-      key: "Amt",
-      label: "物品数量",
-      display: (_index, itemData) => imgui.text(itemData.get_num().toString()),
-    },
+    { key: "Slot", label: "槽位", display: (data) => imgui.text(data.Index.toString()) },
+    { key: "Id", label: "物品ID", display: (data) => imgui.text(data.get_id().toString()) },
+    { key: "Name", label: "物品名称", display: (data) => imgui.text(data.get_name()) },
+    { key: "Amt", label: "物品数量", display: (data) => imgui.text(data.get_num().toString()) },
     {
       key: "select",
       label: "",
-      display: (index) => {
+      display: (_data, index) => {
         imgui.push_id(`选择${index}`);
         if (imgui.button("选择")) {
           ItemBoxEdit.Item_box_slot = index;

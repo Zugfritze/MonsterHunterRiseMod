@@ -161,7 +161,7 @@ export namespace imgui_extra {
       }
     }
 
-    export type TableConfig<T> = { key: string; label: string; display: (index: number, data: T) => void }[];
+    export type TableConfig<T> = { key: string; label: string; display: (data: T, index: number) => void }[];
 
     export function table<T>(tableId: string, data: T[], config: TableConfig<T>) {
       if (imgui.begin_table(tableId, config.length, ImGuiTableFlags.Borders)) {
@@ -177,7 +177,7 @@ export namespace imgui_extra {
           for (let i = 0; i < config.length; i++) {
             const configItem = config[i];
             imgui.table_set_column_index(i);
-            configItem.display(index, dataItem);
+            configItem.display(dataItem, index);
           }
         }
         imgui.end_table();

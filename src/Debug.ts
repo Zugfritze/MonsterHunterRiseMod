@@ -40,49 +40,36 @@ export class Debug {
   private static MonitoringDataList: MonitoringData[] = [];
   private static TypeDefinitions: Map<RETypeDefinition, TypeOptions> = new Map();
   private static MonitoringTableConfig: TableConfig<MonitoringData> = [
-    { key: "key", label: "Key", display: (_index, data) => imgui.text(data.key) },
-    { key: "data", label: "数据", display: (_index, data) => imgui.text(data.data) },
-    { key: "time", label: "时间", display: (_index, data) => imgui.text(os.date("%X", data.time)) },
+    { key: "key", label: "Key", display: (data) => imgui.text(data.key) },
+    { key: "data", label: "数据", display: (data) => imgui.text(data.data) },
+    { key: "time", label: "时间", display: (data) => imgui.text(os.date("%X", data.time)) },
   ];
   private static FieldTableConfig: TableConfig<REField> = [
-    {
-      key: "field_name",
-      label: "字段名",
-      display: (_index, data) => imgui.text(data.get_name()),
-    },
-    {
-      key: "field_type",
-      label: "字段类型",
-      display: (_index, data) => imgui.text(data.get_type().get_full_name()),
-    },
+    { key: "field_name", label: "字段名", display: (data) => imgui.text(data.get_name()) },
+    { key: "field_type", label: "字段类型", display: (data) => imgui.text(data.get_type().get_full_name()) },
   ];
   private static MethodTableConfig: TableConfig<REMethodDefinition> = [
-    {
-      key: "method_name",
-      label: "方法名",
-      display: (_index, data) => imgui.text(data.get_name()),
-    },
+    { key: "method_name", label: "方法名", display: (data) => imgui.text(data.get_name()) },
     {
       key: "method_param_type_names",
       label: "方法参数",
-      display: (_index, data) => {
+      display: (data) =>
         imgui.text(
           data
             .get_param_types()
             .map((param) => param.get_full_name())
             .join(", "),
-        );
-      },
+        ),
     },
     {
       key: "method_return_type_name",
       label: "方法返回值",
-      display: (_index, data) => imgui.text(data.get_return_type().get_full_name()),
+      display: (data) => imgui.text(data.get_return_type().get_full_name()),
     },
     {
       key: "method_notes",
       label: "备注",
-      display: (_index, data) => {
+      display: (data) => {
         switch (data.get_name()) {
           case ".cctor":
             imgui.text("静态构造函数");

@@ -193,17 +193,17 @@ class OtSkillTable {
     ["<ICON Otomoskill_Blue>", "蓝色技能"],
   ];
   static DefaultConfig: TableConfig<SkillData> = [
-    { key: "Id", label: "技能ID", display: (_index: number, data: SkillData) => imgui.text(data.Id.toString()) },
+    { key: "Id", label: "技能ID", display: (data) => imgui.text(data.Id.toString()) },
     {
       key: "ColorName",
       label: "技能颜色",
-      display: (_index, data) => imgui.text(OtSkillTable.OtSkillColorMap[data.IconColor] ?? data.IconColor.toString()),
+      display: (data) => imgui.text(OtSkillTable.OtSkillColorMap[data.IconColor] ?? data.IconColor.toString()),
     },
-    { key: "Name", label: "技能名称", display: (_index, data) => imgui.text(data.Name) },
+    { key: "Name", label: "技能名称", display: (data) => imgui.text(data.Name) },
     {
       key: "Explain",
       label: "技能描述",
-      display: (_index, data) => {
+      display: (data) => {
         let Explain: string = data.Explain;
         for (const [key, value] of OtSkillTable.OtSkillExplainSkillIconTagMap) {
           Explain = Explain.replace(key, value);
@@ -211,16 +211,8 @@ class OtSkillTable {
         imgui.text(Explain);
       },
     },
-    {
-      key: "UnlockLv",
-      label: "解锁等级",
-      display: (_index, data) => imgui.text(data.UnlockLv.toString()),
-    },
-    {
-      key: "SlotNum",
-      label: "槽位消耗",
-      display: (_index, data) => imgui.text(data.SlotNum.toString()),
-    },
+    { key: "UnlockLv", label: "解锁等级", display: (data) => imgui.text(data.UnlockLv.toString()) },
+    { key: "SlotNum", label: "槽位消耗", display: (data) => imgui.text(data.SlotNum.toString()) },
   ];
 
   static UI<T extends SkillData>(data: T[], config: TableConfig<T> = OtSkillTable.DefaultConfig) {
@@ -232,15 +224,11 @@ export class BuddySkillEdit {
   static CurrentSelectionSkill: SkillData | undefined = undefined;
   static EmployedOtSkillListTableConfig: TableConfig<SkillDataEx> = [
     ...OtSkillTable.DefaultConfig,
-    {
-      key: "ownerName",
-      label: "拥有者",
-      display: (_index, data) => imgui.text(data.OwnerNames.join(",")),
-    },
+    { key: "ownerName", label: "拥有者", display: (data) => imgui.text(data.OwnerNames.join(",")) },
     {
       key: "select",
       label: "",
-      display: (index, data) => {
+      display: (data, index) => {
         imgui.push_id(`选择${index}`);
         if (imgui.button("选择")) {
           BuddySkillEdit.CurrentSelectionSkill = data;
@@ -298,7 +286,7 @@ export class BuddySkillEdit {
                 {
                   key: "cover",
                   label: "",
-                  display: (index) => {
+                  display: (_data, index) => {
                     if (
                       BuddySkillEdit.CurrentSelectionSkill != undefined &&
                       otomoData.getVariation() == BuddySkillEdit.CurrentSelectionSkill.OtomoVariation
