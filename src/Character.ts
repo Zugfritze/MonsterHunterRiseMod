@@ -105,7 +105,7 @@ export class Character {
       }
 
       const currentTime = os.time();
-      if (currentTime - this.lastTime >= 1) {
+      if (os.difftime(this.lastTime, currentTime) >= 1) {
         this.lastTime = currentTime;
 
         const percentage: number = this.config.get("PercentageVitalRecovery");
