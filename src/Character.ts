@@ -60,8 +60,8 @@ export class Character {
   ];
 
   static ui() {
-    if (imgui.tree_node("玩家编辑")) {
-      if (imgui.tree_node("信息")) {
+    imgui_extra.tree_node("玩家编辑", () => {
+      imgui_extra.tree_node("信息", () => {
         const playerData = Utils.getPlayerData();
         if (playerData) {
           imgui.text(`攻击力: ${playerData.get_field("_Attack")}`);
@@ -69,8 +69,7 @@ export class Character {
           imgui.text(`额外攻击力: ${playerData.get_field("_AtkUpAlive")}`);
           imgui.text(`额外防御力: ${playerData.get_field("_DefUpAlive")}`);
         }
-        imgui.tree_pop();
-      }
+      });
 
       for (const item of this.uiConfigItems) {
         const [changed, value] = imgui_extra.input_number(
@@ -84,8 +83,7 @@ export class Character {
           this.config.set(item.key, value);
         }
       }
-      imgui.tree_pop();
-    }
+    });
   }
 
   static init_hook() {

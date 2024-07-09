@@ -255,10 +255,9 @@ export class BuddySkillEdit {
   };
 
   static ui() {
-    if (imgui.tree_node("伙伴技能修改")) {
+    imgui_extra.tree_node("伙伴技能修改", () => {
       const DataManager = sdk.get_managed_singleton("snow.data.DataManager");
       if (DataManager == undefined) {
-        imgui.tree_pop();
         return;
       }
 
@@ -274,18 +273,15 @@ export class BuddySkillEdit {
         imgui.text("没有选择技能");
       }
 
-      if (imgui.tree_node("已有技能库")) {
+      imgui_extra.tree_node("已有技能库", () => {
         const employedOtSkillList = EmployedOtSkillList.get(DataManager);
-        if (imgui.tree_node("猫")) {
+        imgui_extra.tree_node("猫", () => {
           OtSkillTable.UI(employedOtSkillList.cat, this.EmployedOtSkillListTableConfig);
-          imgui.tree_pop();
-        }
-        if (imgui.tree_node("狗")) {
+        });
+        imgui_extra.tree_node("狗", () => {
           OtSkillTable.UI(employedOtSkillList.dog, this.EmployedOtSkillListTableConfig);
-          imgui.tree_pop();
-        }
-        imgui.tree_pop();
-      }
+        });
+      });
 
       const Otomos: REManagedObject = DataManager.get_field("<AttendantOtomoDataList>k__BackingField");
       const Otomos_Count: number = Otomos.call("get_Count");
@@ -293,8 +289,8 @@ export class BuddySkillEdit {
         const Otomo: REManagedObject | undefined = Otomos.call("Get", i);
         if (Otomo != undefined) {
           const otomoData = new OtomoData(Otomo);
-          if (imgui.tree_node(`${otomoData.getName()} (${this.OtVariationMap[otomoData.getVariation()]})`)) {
-            if (imgui.tree_node("技能列表")) {
+          imgui_extra.tree_node(`${otomoData.getName()} (${this.OtVariationMap[otomoData.getVariation()]})`, () => {
+            imgui_extra.tree_node("技能列表", () => {
               const AllSkill = otomoData.AllSkill;
               imgui.text(`技能数量: ${AllSkill.getCapacity()}/${AllSkill.getCount()}`);
               const EquippedTableConfig: TableConfig<SkillData> = [
@@ -323,20 +319,16 @@ export class BuddySkillEdit {
                 },
               ];
               OtSkillTable.UI(AllSkill.getDataList(), EquippedTableConfig);
-              imgui.tree_pop();
-            }
+            });
 
-            if (imgui.tree_node("已启用技能列表")) {
+            imgui_extra.tree_node("已启用技能列表", () => {
               const EnableSkill = otomoData.EnableSkill;
               imgui.text(`技能数量: ${EnableSkill.getCapacity()}/${EnableSkill.getCount()}`);
               OtSkillTable.UI(EnableSkill.getDataList());
-              imgui.tree_pop();
-            }
-            imgui.tree_pop();
-          }
+            });
+          });
         }
       }
-      imgui.tree_pop();
-    }
+    });
   }
 }

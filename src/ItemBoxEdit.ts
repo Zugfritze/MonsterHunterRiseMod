@@ -75,7 +75,7 @@ export class ItemBoxEdit {
   ];
 
   static ui() {
-    if (imgui.tree_node("物品箱编辑")) {
+    imgui_extra.tree_node("物品箱编辑", () => {
       const DataManager: REManagedObject = sdk.get_managed_singleton("snow.data.DataManager");
       const itemBox: REManagedObject = DataManager.get_field("_PlItemBox");
 
@@ -94,7 +94,7 @@ export class ItemBoxEdit {
         }
       }
 
-      if (imgui.tree_node("物品箱")) {
+      imgui_extra.tree_node("物品箱", () => {
         Components.searchAndCheckboxes("搜索", this.searchOptions, [
           { key: "searchByItemBoxSlot", label: "搜索槽位" },
           { key: "searchByItemID", label: "搜索物品ID", same_line: true },
@@ -116,8 +116,7 @@ export class ItemBoxEdit {
         });
 
         Components.table("物品箱表", filterItemList, this.TableConfig);
-        imgui.tree_pop();
-      }
+      });
 
       const [Item_box_slot_changed, Item_box_slot_value] = imgui_extra.input_number("物品箱槽位", this.Item_box_slot, [
         0,
@@ -139,7 +138,6 @@ export class ItemBoxEdit {
           itemData.RawData.get_field("_ItemCount").set_field("_Num", this.Item_amt);
         }
       }
-      imgui.tree_pop();
-    }
+    });
   }
 }

@@ -11,13 +11,12 @@ export class Other {
   private static config = new ConfigManager("BPQSMHRMod/other.json", new OtherConfig());
 
   static ui() {
-    if (imgui.tree_node("其他")) {
+    imgui_extra.tree_node("其他", () => {
       const [changed, value] = imgui_extra.input_number("自动保存间隔", this.config.get("autoSaveInterval"));
       if (changed) {
         this.config.set("autoSaveInterval", value);
       }
-      imgui.tree_pop();
-    }
+    });
   }
 
   static init_hook() {

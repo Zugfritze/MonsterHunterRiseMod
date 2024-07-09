@@ -27,6 +27,13 @@ export namespace imgui_extra {
     return [false, value];
   }
 
+  export function tree_node(label: string, nodeBody: () => void) {
+    if (imgui.tree_node(label)) {
+      nodeBody();
+      imgui.tree_pop();
+    }
+  }
+
   export enum ImGuiInputTextFlags {
     None = 0,
     CharsDecimal = 1 << 0,

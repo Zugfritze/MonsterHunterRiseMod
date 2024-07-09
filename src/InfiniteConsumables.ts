@@ -1,6 +1,7 @@
 import { ConfigManager } from "./ConfigManager";
 import { KeysOfType } from "./Tools/Types";
 import { Utils } from "./Utils";
+import { imgui_extra } from "./Tools/imgui_extra";
 
 class InfiniteConsumablesConfig {
   infiniteCoating: boolean = false;
@@ -24,15 +25,14 @@ export class InfiniteConsumables {
   ];
 
   static ui() {
-    if (imgui.tree_node("无限消耗品")) {
+    imgui_extra.tree_node("无限消耗品", () => {
       for (const item of this.uiConfigItems) {
         const [changed, value] = imgui.checkbox(item.label, this.config.get(item.key));
         if (changed) {
           this.config.set(item.key, value);
         }
       }
-      imgui.tree_pop();
-    }
+    });
   }
 
   static init_hook() {

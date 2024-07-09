@@ -93,43 +93,48 @@ export class Debug {
   }
 
   static ui() {
-    if (imgui.tree_node("调试")) {
+    imgui_extra.tree_node("调试", () => {
       for (const [TypeDefinition, TypeOptions] of this.TypeDefinitions) {
-        if (imgui.tree_node(TypeDefinition.get_full_name())) {
+        imgui_extra.tree_node(TypeDefinition.get_full_name(), () => {
           const fields = TypeDefinition.get_fields();
           const field_category_options = TypeOptions.field;
-          if (fields.length > 0 && imgui.tree_node("字段")) {
-            const [staticFieldArray, instanceFieldArray] = this.partitionByStatic(fields);
-            if (staticFieldArray.length > 0 && imgui.tree_node("静态")) {
-              this.fieldTableUI(staticFieldArray, field_category_options.static);
-              imgui.tree_pop();
-            }
-            if (instanceFieldArray.length > 0 && imgui.tree_node("非静态")) {
-              this.fieldTableUI(instanceFieldArray, field_category_options.instance);
-              imgui.tree_pop();
-            }
-            imgui.tree_pop();
+          if (fields.length > 0) {
+            imgui_extra.tree_node("字段", () => {
+              const [staticFieldArray, instanceFieldArray] = this.partitionByStatic(fields);
+              if (staticFieldArray.length > 0) {
+                imgui_extra.tree_node("静态", () => {
+                  this.fieldTableUI(staticFieldArray, field_category_options.static);
+                });
+              }
+              if (instanceFieldArray.length > 0) {
+                imgui_extra.tree_node("非静态", () => {
+                  this.fieldTableUI(instanceFieldArray, field_category_options.instance);
+                });
+              }
+            });
           }
 
           const methods = TypeDefinition.get_methods();
           const method_category_options = TypeOptions.method;
-          if (methods.length > 0 && imgui.tree_node("方法")) {
-            const [staticMethodArray, instanceMethodArray] = this.partitionByStatic(methods);
-            if (staticMethodArray.length > 0 && imgui.tree_node("静态")) {
-              this.methodTableUI(staticMethodArray, method_category_options.static);
-              imgui.tree_pop();
-            }
-            if (instanceMethodArray.length > 0 && imgui.tree_node("非静态")) {
-              this.methodTableUI(instanceMethodArray, method_category_options.instance);
-              imgui.tree_pop();
-            }
-            imgui.tree_pop();
+          if (methods.length > 0) {
+            imgui_extra.tree_node("方法", () => {
+              const [staticMethodArray, instanceMethodArray] = this.partitionByStatic(methods);
+
+              if (staticMethodArray.length > 0) {
+                imgui_extra.tree_node("静态", () => {
+                  this.methodTableUI(staticMethodArray, method_category_options.static);
+                });
+              }
+              if (instanceMethodArray.length > 0) {
+                imgui_extra.tree_node("非静态", () => {
+                  this.methodTableUI(instanceMethodArray, method_category_options.instance);
+                });
+              }
+            });
           }
-          imgui.tree_pop();
-        }
+        });
       }
-      imgui.tree_pop();
-    }
+    });
   }
 
   private static partitionByStatic<T extends { is_static(): boolean }>(param: T[]): [T[], T[]] {
