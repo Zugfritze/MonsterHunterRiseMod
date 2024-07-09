@@ -3,6 +3,7 @@ import { ItemBoxEdit } from "./ItemBoxEdit";
 import { InfiniteConsumables } from "./InfiniteConsumables";
 import { BuddySkillEdit } from "./BuddySkillEdit";
 import { Debug } from "./Debug";
+import { Other } from "./Other";
 import { imgui_extra } from "./Tools/imgui_extra";
 import ImGuiWindowFlags = imgui_extra.ImGuiWindowFlags;
 
@@ -19,6 +20,7 @@ class Main {
 
     Character.init_hook();
     InfiniteConsumables.init_hook();
+    Other.init_hook();
 
     return true;
   }
