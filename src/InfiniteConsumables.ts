@@ -77,14 +77,17 @@ export class InfiniteConsumables {
     Utils.hookMethod("snow.player.fsm.PlayerFsm2ActionHunterWire", "start", () => {
       if (this.config.get("infiniteWirebug")) {
         const playerBase = Utils.getPlayerBase();
-
-        let wireGuages = playerBase.get_field("_HunterWireGauge");
-        if (wireGuages == null) return;
-
-        wireGuages = wireGuages.get_elements();
-        for (const gauge of wireGuages) {
-          gauge.set_field("_RecastTimer", 0);
-          gauge.set_field("_RecoverWaitTimer", 0);
+        const wireGuages: REManagedObject | undefined = playerBase.get_field("_HunterWireGauge");
+        if (wireGuages == undefined) return;
+        const wireGuages_Count: number = wireGuages.call("get_Count");
+        for (let i = 0; i < wireGuages_Count; i++) {
+          const gauge: REManagedObject | undefined = wireGuages.call("Get", i);
+          if (gauge != undefined) {
+            gauge.set_field("_RecastTimer", 0);
+            gauge.set_field("_RecoverWaitTimer", 0);
+          } else {
+            break;
+          }
         }
       }
     });
