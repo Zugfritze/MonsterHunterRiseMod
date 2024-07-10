@@ -1,4 +1,5 @@
 import { imgui_extra } from "./Tools/imgui_extra";
+import { Utils } from "./Utils";
 import TableConfig = imgui_extra.Components.TableConfig;
 
 class SkillData {
@@ -244,78 +245,82 @@ export class BuddySkillEdit {
 
   static ui() {
     imgui_extra.tree_node("伙伴技能修改", () => {
-      const DataManager = sdk.get_managed_singleton("snow.data.DataManager");
-      if (DataManager == undefined) {
-        return;
-      }
+      if (Utils.isInVillage()) {
+        const DataManager = sdk.get_managed_singleton("snow.data.DataManager");
+        if (DataManager == undefined) {
+          return;
+        }
 
-      if (this.CurrentSelectionSkill != undefined) {
-        imgui.text(
-          `当前选择: ${this.CurrentSelectionSkill.Name}(${this.OtVariationMap[this.CurrentSelectionSkill.OtomoVariation]})`,
-        );
-        imgui.same_line();
-        if (imgui.button("取消选择")) {
-          this.CurrentSelectionSkill = undefined;
+        if (this.CurrentSelectionSkill != undefined) {
+          imgui.text(
+            `当前选择: ${this.CurrentSelectionSkill.Name}(${this.OtVariationMap[this.CurrentSelectionSkill.OtomoVariation]})`,
+          );
+          imgui.same_line();
+          if (imgui.button("取消选择")) {
+            this.CurrentSelectionSkill = undefined;
+          }
+        } else {
+          imgui.text("没有选择技能");
+        }
+
+        imgui_extra.tree_node("已有技能库", () => {
+          const employedOtSkillList = EmployedOtSkillList.get(DataManager);
+          imgui_extra.tree_node("猫", () => {
+            OtSkillTable.UI(employedOtSkillList.cat, this.EmployedOtSkillListTableConfig);
+          });
+          imgui_extra.tree_node("狗", () => {
+            OtSkillTable.UI(employedOtSkillList.dog, this.EmployedOtSkillListTableConfig);
+          });
+        });
+
+        const Otomos: REManagedObject = DataManager.get_field("<AttendantOtomoDataList>k__BackingField");
+        const Otomos_Count: number = Otomos.call("get_Count");
+        for (let i = 0; i < Otomos_Count; i++) {
+          const Otomo: REManagedObject | undefined = Otomos.call("Get", i);
+          if (Otomo != undefined) {
+            const otomoData = new OtomoData(Otomo);
+            imgui_extra.tree_node(`${otomoData.getName()} (${this.OtVariationMap[otomoData.getVariation()]})`, () => {
+              imgui_extra.tree_node("技能列表", () => {
+                const AllSkill = otomoData.AllSkill;
+                imgui.text(`技能数量: ${AllSkill.getCapacity()}/${AllSkill.getCount()}`);
+                const EquippedTableConfig: TableConfig<SkillData> = [
+                  ...OtSkillTable.DefaultConfig,
+                  {
+                    key: "cover",
+                    label: "",
+                    display: (_data, index) => {
+                      if (
+                        BuddySkillEdit.CurrentSelectionSkill != undefined &&
+                        otomoData.getVariation() == BuddySkillEdit.CurrentSelectionSkill.OtomoVariation
+                      ) {
+                        if (!otomoData.AllSkill.ContainsId(BuddySkillEdit.CurrentSelectionSkill.Id)) {
+                          imgui.push_id(`覆盖${index}`);
+                          if (imgui.button("覆盖")) {
+                            otomoData.ClearEnableSkill();
+                            otomoData.AllSkill.RawData.call("set_Item", index, BuddySkillEdit.CurrentSelectionSkill.Id);
+                            BuddySkillEdit.CurrentSelectionSkill = undefined;
+                          }
+                          imgui.pop_id();
+                        } else {
+                          imgui.text("已有该技能");
+                        }
+                      }
+                    },
+                  },
+                ];
+                OtSkillTable.UI(AllSkill.getDataList(), EquippedTableConfig);
+              });
+
+              imgui_extra.tree_node("已启用技能列表", () => {
+                const EnableSkill = otomoData.EnableSkill;
+                imgui.text(`技能数量: ${EnableSkill.getCapacity()}/${EnableSkill.getCount()}`);
+                OtSkillTable.UI(EnableSkill.getDataList());
+              });
+            });
+          }
         }
       } else {
-        imgui.text("没有选择技能");
-      }
-
-      imgui_extra.tree_node("已有技能库", () => {
-        const employedOtSkillList = EmployedOtSkillList.get(DataManager);
-        imgui_extra.tree_node("猫", () => {
-          OtSkillTable.UI(employedOtSkillList.cat, this.EmployedOtSkillListTableConfig);
-        });
-        imgui_extra.tree_node("狗", () => {
-          OtSkillTable.UI(employedOtSkillList.dog, this.EmployedOtSkillListTableConfig);
-        });
-      });
-
-      const Otomos: REManagedObject = DataManager.get_field("<AttendantOtomoDataList>k__BackingField");
-      const Otomos_Count: number = Otomos.call("get_Count");
-      for (let i = 0; i < Otomos_Count; i++) {
-        const Otomo: REManagedObject | undefined = Otomos.call("Get", i);
-        if (Otomo != undefined) {
-          const otomoData = new OtomoData(Otomo);
-          imgui_extra.tree_node(`${otomoData.getName()} (${this.OtVariationMap[otomoData.getVariation()]})`, () => {
-            imgui_extra.tree_node("技能列表", () => {
-              const AllSkill = otomoData.AllSkill;
-              imgui.text(`技能数量: ${AllSkill.getCapacity()}/${AllSkill.getCount()}`);
-              const EquippedTableConfig: TableConfig<SkillData> = [
-                ...OtSkillTable.DefaultConfig,
-                {
-                  key: "cover",
-                  label: "",
-                  display: (_data, index) => {
-                    if (
-                      BuddySkillEdit.CurrentSelectionSkill != undefined &&
-                      otomoData.getVariation() == BuddySkillEdit.CurrentSelectionSkill.OtomoVariation
-                    ) {
-                      if (!otomoData.AllSkill.ContainsId(BuddySkillEdit.CurrentSelectionSkill.Id)) {
-                        imgui.push_id(`覆盖${index}`);
-                        if (imgui.button("覆盖")) {
-                          otomoData.ClearEnableSkill();
-                          otomoData.AllSkill.RawData.call("set_Item", index, BuddySkillEdit.CurrentSelectionSkill.Id);
-                          BuddySkillEdit.CurrentSelectionSkill = undefined;
-                        }
-                        imgui.pop_id();
-                      } else {
-                        imgui.text("已有该技能");
-                      }
-                    }
-                  },
-                },
-              ];
-              OtSkillTable.UI(AllSkill.getDataList(), EquippedTableConfig);
-            });
-
-            imgui_extra.tree_node("已启用技能列表", () => {
-              const EnableSkill = otomoData.EnableSkill;
-              imgui.text(`技能数量: ${EnableSkill.getCapacity()}/${EnableSkill.getCount()}`);
-              OtSkillTable.UI(EnableSkill.getDataList());
-            });
-          });
-        }
+        imgui.text("不支持在村以为的地方使用");
       }
     });
   }

@@ -1,5 +1,7 @@
 export class Utils {
   private static playerInput: REManagedObject | undefined = undefined;
+  private static t_SnowGameManager: RETypeDefinition = sdk.find_type_definition("snow.SnowGameManager");
+  private static getStatus: REMethodDefinition = Utils.t_SnowGameManager.get_method("getStatus");
 
   static getPlayerBase(): REManagedObject {
     if (this.playerInput == undefined) {
@@ -29,5 +31,10 @@ export class Utils {
   ): void {
     const methodDef = sdk.find_type_definition(typeName).get_method(methodName);
     sdk.hook(methodDef, preFunction, postFunction);
+  }
+
+  static isInVillage(): boolean {
+    const snowGameManager = sdk.get_managed_singleton("snow.SnowGameManager");
+    return snowGameManager != undefined && this.getStatus.call(snowGameManager) == 1;
   }
 }
