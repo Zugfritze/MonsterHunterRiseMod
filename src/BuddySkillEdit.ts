@@ -2,40 +2,44 @@ import { imgui_extra } from "./Tools/imgui_extra";
 import { Utils } from "./Utils";
 import TableConfig = imgui_extra.Components.TableConfig;
 
+const t_data_shortcut = sdk.find_type_definition("snow.data.DataShortcut");
+
+enum OtVariation {
+  Cat = 0,
+  Dog = 1,
+}
+
 class SkillData {
-  private static t_data_shortcut = sdk.find_type_definition("snow.data.DataShortcut");
-  private static getSkillIconColor: REMethodDefinition = SkillData.t_data_shortcut.get_method(
+  private static getSkillIconColor: REMethodDefinition = t_data_shortcut.get_method(
     "getIconColor(snow.otomo.OtomoDef.OtVariation, snow.data.DataDef.OtSkillId)",
   );
-  private static getSkillName: REMethodDefinition = SkillData.t_data_shortcut.get_method(
-    "getName(snow.data.DataDef.OtSkillId)",
-  );
-  private static getSkillExplain: REMethodDefinition = SkillData.t_data_shortcut.get_method(
+  private static getSkillName: REMethodDefinition = t_data_shortcut.get_method("getName(snow.data.DataDef.OtSkillId)");
+  private static getSkillExplain: REMethodDefinition = t_data_shortcut.get_method(
     "getExplain(snow.data.DataDef.OtSkillId)",
   );
-  private static getSkillUnlockLv: REMethodDefinition = SkillData.t_data_shortcut.get_method(
+  private static getSkillUnlockLv: REMethodDefinition = t_data_shortcut.get_method(
     "getUnlockLv(snow.otomo.OtomoDef.OtVariation, snow.data.DataDef.OtSkillId)",
   );
-  private static getSkillSlotNum: REMethodDefinition = SkillData.t_data_shortcut.get_method(
+  private static getSkillSlotNum: REMethodDefinition = t_data_shortcut.get_method(
     "getSlotNum(snow.otomo.OtomoDef.OtVariation, snow.data.DataDef.OtSkillId)",
   );
 
   Id: number;
-  OtomoVariation: number;
+  OtVariation: OtVariation;
   IconColor: number;
   Name: string;
   Explain: string;
   UnlockLv: number;
   SlotNum: number;
 
-  constructor(Id: number, OtomoVariation: number) {
+  constructor(Id: number, OtVariation: OtVariation) {
     this.Id = Id;
-    this.OtomoVariation = OtomoVariation;
-    this.IconColor = SkillData.getSkillIconColor.call(null, OtomoVariation, Id);
+    this.OtVariation = OtVariation;
+    this.IconColor = SkillData.getSkillIconColor.call(null, OtVariation, Id);
     this.Name = SkillData.getSkillName.call(null, Id);
     this.Explain = SkillData.getSkillExplain.call(null, Id);
-    this.UnlockLv = SkillData.getSkillUnlockLv.call(null, OtomoVariation, Id);
-    this.SlotNum = SkillData.getSkillSlotNum.call(null, OtomoVariation, Id);
+    this.UnlockLv = SkillData.getSkillUnlockLv.call(null, OtVariation, Id);
+    this.SlotNum = SkillData.getSkillSlotNum.call(null, OtVariation, Id);
   }
 }
 
@@ -63,7 +67,7 @@ class SkillList {
   getDataList(): SkillData[] {
     const SkillDataList: SkillData[] = [];
     for (let Index = 0; Index < this.getCount(); Index++) {
-      const Id: number = this.RawData.call("get_Item", Index);
+      const Id = this.RawData.call<[number], number>("get_Item", Index);
       SkillDataList.push(new SkillData(Id, this.Owner.getVariation()));
     }
     return SkillDataList;
@@ -80,23 +84,92 @@ class SkillList {
   }
 }
 
+class SupportAction {
+  private static getName: REMethodDefinition = t_data_shortcut.get_method(
+    "getName(snow.data.DataDef.OtSupportActionId)",
+  );
+  private static getExplain: REMethodDefinition = t_data_shortcut.get_method(
+    "getExplain(snow.data.DataDef.OtSupportActionId)",
+  );
+  private static getOpenLv: REMethodDefinition = t_data_shortcut.get_method(
+    "getOpenLv(snow.data.DataDef.OtSupportActionId)",
+  );
+
+  Id: number;
+  Name: string;
+  Explain: string;
+  OpenLv: number;
+
+  constructor(Id: number) {
+    this.Id = Id;
+    this.Name = SupportAction.getName.call(null, Id);
+    this.Explain = SupportAction.getExplain.call(null, Id);
+    this.OpenLv = SupportAction.getOpenLv.call(null, Id);
+  }
+}
+
+interface SupportActionEx extends SupportAction {
+  OwnerNames: string[];
+}
+
+class SupportInfo {
+  readonly Owner: OtomoData;
+  readonly RawData: REManagedObject;
+
+  constructor(owner: OtomoData, SupportInfo: REManagedObject) {
+    this.Owner = owner;
+    this.RawData = SupportInfo;
+  }
+
+  getSupportActionList(): SupportAction[] {
+    const ActionIdList = this.RawData.get_field<REManagedObject>("_SupportActionIdList");
+    const ActionIdList_Count = ActionIdList.call<[], number>("get_Count");
+    const SupportActionList: SupportAction[] = [];
+    for (let i = 0; i < ActionIdList_Count; i++) {
+      const actionId = ActionIdList.call<[number], number | undefined>("Get", i);
+      if (actionId != undefined) {
+        SupportActionList.push(new SupportAction(actionId));
+      }
+    }
+    return SupportActionList;
+  }
+
+  ContainsId(Id: number): boolean {
+    const ActionList = this.getSupportActionList();
+    for (const action of ActionList) {
+      if (action.Id == Id) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
 class OtomoData {
   readonly RawData: REManagedObject;
   AllSkill: SkillList;
   EnableSkill: SkillList;
+  SupportInfo?: SupportInfo;
 
   constructor(Otomo: REManagedObject) {
     this.RawData = Otomo;
     this.AllSkill = new SkillList(this, Otomo.get_field("_OtSkillIdList"));
     this.EnableSkill = new SkillList(this, Otomo.get_field("_EnableOtSkillIdList"));
+    if (this.getVariation() == OtVariation.Cat) {
+      this.SupportInfo = new SupportInfo(this, Otomo.get_field("_SupportInfo"));
+    }
   }
 
   getName(): string {
     return this.RawData.call("getName");
   }
 
-  getVariation(): number {
+  getVariation(): OtVariation {
     return this.RawData.call("getVariation");
+  }
+
+  hasSupportInfo(): this is { SupportInfo: SupportInfo } {
+    return this.SupportInfo != undefined;
   }
 
   ClearEnableSkill() {
@@ -104,82 +177,64 @@ class OtomoData {
   }
 }
 
-type OtVariationResult<T> = { cat: T; dog: T };
-
-class EmployedOtSkillList {
-  static get(DataManager: REManagedObject): OtVariationResult<SkillDataEx[]> {
-    const EmployedOtomoList: REManagedObject = DataManager.get_field("<EmployedOtomoList>k__BackingField");
-    const catEmployedOtomoDataListRaw: REManagedObject = EmployedOtomoList.call(
+class OtomoTools {
+  static getEmployedOtomoDataList(DataManager: REManagedObject, otVariation: OtVariation): OtomoData[] {
+    const EmployedOtomoList = DataManager.get_field<REManagedObject>("<EmployedOtomoList>k__BackingField");
+    const EmployedOtomoDataListRaw = EmployedOtomoList.call<[OtVariation], REManagedObject>(
       "getEmployedOtomoDataList(snow.otomo.OtomoDef.OtVariation)",
-      0,
+      otVariation,
     );
-    const dogEmployedOtomoDataListRaw: REManagedObject = EmployedOtomoList.call(
-      "getEmployedOtomoDataList(snow.otomo.OtomoDef.OtVariation)",
-      1,
-    );
-    const getEmployedOtomoDataListResult = this.getEmployedOtomoDataList([
-      { key: "cat", EmployedOtomoDataListRaw: catEmployedOtomoDataListRaw },
-      { key: "dog", EmployedOtomoDataListRaw: dogEmployedOtomoDataListRaw },
-    ]);
-    return this.getSkillDataExList([
-      { key: "cat", OtomoDataList: getEmployedOtomoDataListResult.cat },
-      { key: "dog", OtomoDataList: getEmployedOtomoDataListResult.dog },
-    ]);
-  }
-
-  private static getEmployedOtomoDataList(
-    config: {
-      key: keyof OtVariationResult<OtomoData[]>;
-      EmployedOtomoDataListRaw: REManagedObject;
-    }[],
-  ): OtVariationResult<OtomoData[]> {
-    const result: OtVariationResult<OtomoData[]> = {
-      cat: [],
-      dog: [],
-    };
-    for (const configItem of config) {
-      const Count: number = configItem.EmployedOtomoDataListRaw.call("get_Count");
-      for (let i = 0; i < Count; i++) {
-        const EmployedOtomoData: REManagedObject = configItem.EmployedOtomoDataListRaw.call("get_Item", i);
-        const OtomoDataRaw: REManagedObject = EmployedOtomoData.call("get_OtomoData");
-        // EmployedOtomoDataListRaw(C#类型:List<snow.data.EmployedOtomoData>)里是固定的35个EmployedOtomoData但是EmployedOtomoData里面不一定有OtomoData
-        if (OtomoDataRaw != undefined) {
-          result[configItem.key].push(new OtomoData(OtomoDataRaw));
-        }
+    const result: OtomoData[] = [];
+    const Count = EmployedOtomoDataListRaw.call<[], number>("get_Count");
+    for (let i = 0; i < Count; i++) {
+      const EmployedOtomoData = EmployedOtomoDataListRaw.call<[number], REManagedObject>("get_Item", i);
+      const OtomoDataRaw = EmployedOtomoData.call<[], REManagedObject>("get_OtomoData");
+      // EmployedOtomoDataListRaw(C#类型:List<snow.data.EmployedOtomoData>)里是固定的35个EmployedOtomoData但是EmployedOtomoData里面不一定有OtomoData
+      if (OtomoDataRaw != undefined) {
+        result.push(new OtomoData(OtomoDataRaw));
       }
     }
     return result;
   }
 
-  private static getSkillDataExList(
-    config: {
-      key: keyof OtVariationResult<SkillDataEx[]>;
-      OtomoDataList: OtomoData[];
-    }[],
-  ): OtVariationResult<SkillDataEx[]> {
-    const result: OtVariationResult<SkillDataEx[]> = {
-      cat: [],
-      dog: [],
-    };
-    for (const configItem of config) {
-      const mergedMap = new Map<number, SkillDataEx>();
-      for (const otomoData of configItem.OtomoDataList) {
-        const dataList = otomoData.AllSkill.getDataList();
+  static getMergeSkillDataWithOwners(otomoDataList: OtomoData[]): SkillDataEx[] {
+    const mergedMap = new Map<number, SkillDataEx>();
+    for (const otomoData of otomoDataList) {
+      const dataList = otomoData.AllSkill.getDataList();
+      for (const data of dataList) {
+        const existingSkillData = mergedMap.get(data.Id);
+        if (existingSkillData == undefined) {
+          mergedMap.set(data.Id, { ...data, OwnerNames: [otomoData.getName()] });
+        } else {
+          const ownerName = otomoData.getName();
+          if (!existingSkillData.OwnerNames.includes(ownerName)) {
+            existingSkillData.OwnerNames.push(ownerName);
+          }
+        }
+      }
+    }
+    return Array.from(mergedMap.values()).sort((a, b) => a.Id - b.Id);
+  }
+
+  static getMergeSupportActionWithOwners(catOtomoData: OtomoData[]): SupportActionEx[] {
+    const mergedMap = new Map<number, SupportActionEx>();
+    for (const otomoData of catOtomoData) {
+      if (otomoData.hasSupportInfo()) {
+        const dataList = otomoData.SupportInfo.getSupportActionList();
         for (const data of dataList) {
-          const existingSkillData = mergedMap.get(data.Id);
-          if (existingSkillData == undefined) {
+          const existingSupportAction = mergedMap.get(data.Id);
+          if (existingSupportAction == undefined) {
             mergedMap.set(data.Id, { ...data, OwnerNames: [otomoData.getName()] });
           } else {
             const ownerName = otomoData.getName();
-            if (!existingSkillData.OwnerNames.includes(ownerName)) {
-              existingSkillData.OwnerNames.push(ownerName);
+            if (!existingSupportAction.OwnerNames.includes(ownerName)) {
+              existingSupportAction.OwnerNames.push(ownerName);
             }
           }
         }
       }
-      result[configItem.key] = Array.from(mergedMap.values()).sort((a, b) => a.Id - b.Id);
     }
-    return result;
+    return Array.from(mergedMap.values()).sort((a, b) => a.Id - b.Id);
   }
 }
 
@@ -221,8 +276,22 @@ class OtSkillTable {
   }
 }
 
+class OtSupportTable {
+  static DefaultConfig: TableConfig<SupportAction> = [
+    { key: "Id", label: "动作Id", display: (data) => imgui.text(data.Id.toString()) },
+    { key: "Name", label: "动作名称", display: (data) => imgui.text(data.Name) },
+    { key: "Explain", label: "动作描述", display: (data) => imgui.text(data.Explain) },
+    { key: "OpenLv", label: "解锁等级", display: (data) => imgui.text(data.OpenLv.toString()) },
+  ];
+
+  static UI<T extends SupportAction>(data: T[], config: TableConfig<T> = OtSupportTable.DefaultConfig) {
+    imgui_extra.Components.table("支援动作表", data, config);
+  }
+}
+
 export class BuddySkillEdit {
   static CurrentSelectionSkill: SkillData | undefined = undefined;
+  static CurrentSelectionSupport: SupportAction | undefined = undefined;
   static EmployedOtSkillListTableConfig: TableConfig<SkillDataEx> = [
     ...OtSkillTable.DefaultConfig,
     { key: "ownerName", label: "拥有者", display: (data) => imgui.text(data.OwnerNames.join(",")) },
@@ -238,9 +307,24 @@ export class BuddySkillEdit {
       },
     },
   ];
-  private static OtVariationMap: { [key: number]: string } = {
-    0: "猫",
-    1: "狗",
+  static EmployedOtSupportListTableConfig: TableConfig<SupportActionEx> = [
+    ...OtSupportTable.DefaultConfig,
+    { key: "ownerName", label: "拥有者", display: (data) => imgui.text(data.OwnerNames.join(",")) },
+    {
+      key: "select",
+      label: "",
+      display: (data, index) => {
+        imgui.push_id(`选择${index}`);
+        if (imgui.button("选择")) {
+          BuddySkillEdit.CurrentSelectionSupport = data;
+        }
+        imgui.pop_id();
+      },
+    },
+  ];
+  private static OtVariationMap = {
+    [OtVariation.Cat]: "猫",
+    [OtVariation.Dog]: "狗",
   };
 
   static ui() {
@@ -253,7 +337,7 @@ export class BuddySkillEdit {
 
         if (this.CurrentSelectionSkill != undefined) {
           imgui.text(
-            `当前选择: ${this.CurrentSelectionSkill.Name}(${this.OtVariationMap[this.CurrentSelectionSkill.OtomoVariation]})`,
+            `当前选择技能: ${this.CurrentSelectionSkill.Name}(${this.OtVariationMap[this.CurrentSelectionSkill.OtVariation]})`,
           );
           imgui.same_line();
           if (imgui.button("取消选择")) {
@@ -262,21 +346,41 @@ export class BuddySkillEdit {
         } else {
           imgui.text("没有选择技能");
         }
+        if (this.CurrentSelectionSupport != undefined) {
+          imgui.text(
+            `当前选择支援动作: ${this.CurrentSelectionSupport.Name}(Lv: ${this.CurrentSelectionSupport.OpenLv})`,
+          );
+          imgui.same_line();
+          if (imgui.button("取消选择")) {
+            this.CurrentSelectionSupport = undefined;
+          }
+        } else {
+          imgui.text("没有选择支援动作");
+        }
 
-        imgui_extra.tree_node("已有技能库", () => {
-          const employedOtSkillList = EmployedOtSkillList.get(DataManager);
-          imgui_extra.tree_node("猫", () => {
-            OtSkillTable.UI(employedOtSkillList.cat, this.EmployedOtSkillListTableConfig);
-          });
-          imgui_extra.tree_node("狗", () => {
-            OtSkillTable.UI(employedOtSkillList.dog, this.EmployedOtSkillListTableConfig);
-          });
+        imgui_extra.tree_node("已有技能和支援动作库", () => {
+          const otVariations = [OtVariation.Cat, OtVariation.Dog];
+          for (const otVariation of otVariations) {
+            imgui_extra.tree_node(this.OtVariationMap[otVariation], () => {
+              const employedOtomoDataList = OtomoTools.getEmployedOtomoDataList(DataManager, otVariation);
+              imgui_extra.tree_node("技能", () => {
+                const skillDataList = OtomoTools.getMergeSkillDataWithOwners(employedOtomoDataList);
+                OtSkillTable.UI(skillDataList, this.EmployedOtSkillListTableConfig);
+              });
+              if (otVariation == OtVariation.Cat) {
+                imgui_extra.tree_node("支援动作", () => {
+                  const supportActionList = OtomoTools.getMergeSupportActionWithOwners(employedOtomoDataList);
+                  OtSupportTable.UI(supportActionList, this.EmployedOtSupportListTableConfig);
+                });
+              }
+            });
+          }
         });
 
-        const Otomos: REManagedObject = DataManager.get_field("<AttendantOtomoDataList>k__BackingField");
-        const Otomos_Count: number = Otomos.call("get_Count");
+        const Otomos = DataManager.get_field<REManagedObject>("<AttendantOtomoDataList>k__BackingField");
+        const Otomos_Count = Otomos.call<[], number>("get_Count");
         for (let i = 0; i < Otomos_Count; i++) {
-          const Otomo: REManagedObject | undefined = Otomos.call("Get", i);
+          const Otomo = Otomos.call<[number], REManagedObject | undefined>("Get", i);
           if (Otomo != undefined) {
             const otomoData = new OtomoData(Otomo);
             imgui_extra.tree_node(`${otomoData.getName()} (${this.OtVariationMap[otomoData.getVariation()]})`, () => {
@@ -290,15 +394,15 @@ export class BuddySkillEdit {
                     label: "",
                     display: (_data, index) => {
                       if (
-                        BuddySkillEdit.CurrentSelectionSkill != undefined &&
-                        otomoData.getVariation() == BuddySkillEdit.CurrentSelectionSkill.OtomoVariation
+                        this.CurrentSelectionSkill != undefined &&
+                        otomoData.getVariation() == this.CurrentSelectionSkill.OtVariation
                       ) {
-                        if (!otomoData.AllSkill.ContainsId(BuddySkillEdit.CurrentSelectionSkill.Id)) {
+                        if (!otomoData.AllSkill.ContainsId(this.CurrentSelectionSkill.Id)) {
                           imgui.push_id(`覆盖${index}`);
                           if (imgui.button("覆盖")) {
                             otomoData.ClearEnableSkill();
-                            otomoData.AllSkill.RawData.call("set_Item", index, BuddySkillEdit.CurrentSelectionSkill.Id);
-                            BuddySkillEdit.CurrentSelectionSkill = undefined;
+                            otomoData.AllSkill.RawData.call("set_Item", index, this.CurrentSelectionSkill.Id);
+                            this.CurrentSelectionSkill = undefined;
                           }
                           imgui.pop_id();
                         } else {
@@ -316,6 +420,38 @@ export class BuddySkillEdit {
                 imgui.text(`技能数量: ${EnableSkill.getCapacity()}/${EnableSkill.getCount()}`);
                 OtSkillTable.UI(EnableSkill.getDataList());
               });
+
+              if (otomoData.hasSupportInfo()) {
+                imgui_extra.tree_node("支援动作列表", () => {
+                  const supportActionList = otomoData.SupportInfo.getSupportActionList();
+                  const EquippedTableConfig: TableConfig<SupportAction> = [
+                    ...OtSupportTable.DefaultConfig,
+                    {
+                      key: "cover",
+                      label: "",
+                      display: (_data, index) => {
+                        if (this.CurrentSelectionSupport != undefined) {
+                          if (!otomoData.SupportInfo.ContainsId(this.CurrentSelectionSupport.Id)) {
+                            imgui.push_id(`覆盖${index}`);
+                            if (imgui.button("覆盖")) {
+                              otomoData.SupportInfo.RawData.get_field<REManagedObject>("_SupportActionIdList").call(
+                                "Set",
+                                index,
+                                this.CurrentSelectionSupport.Id,
+                              );
+                              this.CurrentSelectionSupport = undefined;
+                            }
+                            imgui.pop_id();
+                          } else {
+                            imgui.text("已有该支援动作");
+                          }
+                        }
+                      },
+                    },
+                  ];
+                  OtSupportTable.UI(supportActionList, EquippedTableConfig);
+                });
+              }
             });
           }
         }

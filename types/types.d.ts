@@ -21,7 +21,7 @@ declare class REField {
 
   is_static(): boolean;
 
-  get_data(obj: any): any;
+  get_data<TObj, TData>(obj: TObj): TData;
 }
 
 declare class REMethodDefinition {
@@ -39,17 +39,17 @@ declare class REMethodDefinition {
 
   is_static(): boolean;
 
-  call(obj: any, ...args: any[]): any;
+  call<TObj, TArgs extends any[], TReturn>(obj: TObj, ...args: TArgs): TReturn;
 }
 
 declare class REManagedObject {
-  call(method_name: string, ...args: any[]): any;
+  call<TArgs extends any[], TReturn>(method_name: string, ...args: TArgs): TReturn;
 
   get_type_definition(): RETypeDefinition;
 
-  get_field(name: string): any;
+  get_field<T>(name: string): T;
 
-  set_field(name: string, value: any): void;
+  set_field<T>(name: string, value: T): void;
 
   get_address(): number;
 

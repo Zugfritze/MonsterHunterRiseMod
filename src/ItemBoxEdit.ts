@@ -122,7 +122,7 @@ export class ItemBoxEdit {
             this.Item_amt = Item_amt_value;
           }
           if (imgui.button("修改数量至x" + this.Item_amt)) {
-            itemData.RawData.get_field("_ItemCount").set_field("_Num", this.Item_amt);
+            itemData.RawData.get_field<REManagedObject>("_ItemCount").set_field("_Num", this.Item_amt);
           }
         }
       } else {
