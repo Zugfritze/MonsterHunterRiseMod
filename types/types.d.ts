@@ -29,8 +29,6 @@ declare class REMethodDefinition {
 
   get_return_type(): RETypeDefinition;
 
-  get_function(): (...args: any[]) => any;
-
   get_declaring_type(): RETypeDefinition;
 
   get_num_params(): number;
