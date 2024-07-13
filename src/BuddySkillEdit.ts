@@ -200,10 +200,6 @@ class OtomoData {
   hasSupportInfo(): this is { SupportInfo: SupportInfo } {
     return this.SupportInfo != undefined;
   }
-
-  ClearEnableSkill() {
-    this.EnableSkill.RawData.call("Clear");
-  }
 }
 
 class OtomoTools {
@@ -456,7 +452,7 @@ export class BuddySkillEdit {
                         if (!otomoData.AllSkill.ContainsId(this.CurSelectSkill.Id)) {
                           imgui.push_id(`覆盖${index}`);
                           if (imgui.button("覆盖")) {
-                            otomoData.ClearEnableSkill();
+                            otomoData.EnableSkill.RawData.call("Clear");
                             otomoData.AllSkill.RawData.call("set_Item", index, this.CurSelectSkill.Id);
                             this.CurSelectSkill = undefined;
                           }
