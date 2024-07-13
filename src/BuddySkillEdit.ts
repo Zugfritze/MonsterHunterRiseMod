@@ -399,28 +399,27 @@ export class BuddySkillEdit {
           imgui.pop_id();
         } else imgui.text("没有选择支援动作");
 
-        imgui_extra.tree_node("支援类型库", () => {
-          const otSupportTypeIds = [
-            OtSupportTypeId.Fight,
-            OtSupportTypeId.Assist,
-            OtSupportTypeId.Heal,
-            OtSupportTypeId.Bomber,
-            OtSupportTypeId.Collect,
-          ];
-          imgui_extra.Components.table("支援类型表", otSupportTypeIds, this.SupportTypeIdTableConfig);
-        });
-
-        imgui_extra.tree_node("已有技能和支援动作库", () => {
+        imgui_extra.tree_node("库", () => {
           const otVariations = [OtVariation.OtAirou, OtVariation.OtDog];
           for (const otVariation of otVariations) {
             imgui_extra.tree_node(this.OtVariationMap[otVariation], () => {
               const employedOtomoDataList = OtomoTools.getEmployedOtomoDataList(DataManager, otVariation);
-              imgui_extra.tree_node("技能", () => {
+              imgui_extra.tree_node("已有技能", () => {
                 const skillDataList = OtomoTools.getMergeSkillDataWithOwners(employedOtomoDataList);
                 OtSkillTable.UI(skillDataList, this.EmployedOtSkillListTableConfig);
               });
               if (otVariation == OtVariation.OtAirou) {
-                imgui_extra.tree_node("支援动作", () => {
+                imgui_extra.tree_node("支援类型", () => {
+                  const otSupportTypeIds = [
+                    OtSupportTypeId.Fight,
+                    OtSupportTypeId.Assist,
+                    OtSupportTypeId.Heal,
+                    OtSupportTypeId.Bomber,
+                    OtSupportTypeId.Collect,
+                  ];
+                  imgui_extra.Components.table("支援类型表", otSupportTypeIds, this.SupportTypeIdTableConfig);
+                });
+                imgui_extra.tree_node("已有支援动作", () => {
                   const supportActionList = OtomoTools.getMergeSupportActionWithOwners(employedOtomoDataList);
                   OtSupportTable.UI(supportActionList, this.EmployedOtSupportListTableConfig);
                 });
