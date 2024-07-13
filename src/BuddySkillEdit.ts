@@ -5,8 +5,8 @@ import TableConfig = imgui_extra.Components.TableConfig;
 const t_data_shortcut = sdk.find_type_definition("snow.data.DataShortcut");
 
 enum OtVariation {
-  Cat = 0,
-  Dog = 1,
+  OtAirou = 0,
+  OtDog = 1,
 }
 
 class SkillData {
@@ -84,6 +84,31 @@ class SkillList {
   }
 }
 
+enum OtSupportTypeId {
+  Fight = 0,
+  Assist = 1,
+  Heal = 2,
+  Bomber = 3,
+  Collect = 4,
+}
+
+class OtSupportTypeIdTool {
+  private static getNameMD: REMethodDefinition = t_data_shortcut.get_method(
+    "getName(snow.data.DataDef.OtSupportTypeId)",
+  );
+  private static getExplainMD: REMethodDefinition = t_data_shortcut.get_method(
+    "getExplain(snow.data.DataDef.OtSupportTypeId)",
+  );
+
+  static getName(otSupportType: OtSupportTypeId): string {
+    return this.getNameMD.call(null, otSupportType);
+  }
+
+  static getExplain(otSupportType: OtSupportTypeId): string {
+    return this.getExplainMD.call(null, otSupportType);
+  }
+}
+
 class SupportAction {
   private static getName: REMethodDefinition = t_data_shortcut.get_method(
     "getName(snow.data.DataDef.OtSupportActionId)",
@@ -121,6 +146,10 @@ class SupportInfo {
     this.RawData = SupportInfo;
   }
 
+  getSupportType(): OtSupportTypeId {
+    return this.RawData.get_field("_SupportTypeId");
+  }
+
   getSupportActionList(): SupportAction[] {
     const ActionIdList = this.RawData.get_field<REManagedObject>("_SupportActionIdList");
     const ActionIdList_Count = ActionIdList.call<[], number>("get_Count");
@@ -155,7 +184,7 @@ class OtomoData {
     this.RawData = Otomo;
     this.AllSkill = new SkillList(this, Otomo.get_field("_OtSkillIdList"));
     this.EnableSkill = new SkillList(this, Otomo.get_field("_EnableOtSkillIdList"));
-    if (this.getVariation() == OtVariation.Cat) {
+    if (this.getVariation() == OtVariation.OtAirou) {
       this.SupportInfo = new SupportInfo(this, Otomo.get_field("_SupportInfo"));
     }
   }
@@ -290,8 +319,23 @@ class OtSupportTable {
 }
 
 export class BuddySkillEdit {
-  static CurrentSelectionSkill: SkillData | undefined = undefined;
-  static CurrentSelectionSupport: SupportAction | undefined = undefined;
+  static CurSelectSkill: SkillData | undefined = undefined;
+  static CurSelectSupportType: OtSupportTypeId | undefined = undefined;
+  static CurSelectSupportAction: SupportAction | undefined = undefined;
+  static SupportTypeIdTableConfig: TableConfig<OtSupportTypeId> = [
+    { key: "Id", label: "类型Id", display: (data) => imgui.text(data.toString()) },
+    { key: "Name", label: "类型名称", display: (data) => imgui.text(OtSupportTypeIdTool.getName(data)) },
+    { key: "Explain", label: "类型描述", display: (data) => imgui.text(OtSupportTypeIdTool.getExplain(data)) },
+    {
+      key: "select",
+      label: "",
+      display: (data, index) => {
+        imgui.push_id(`选择${index}`);
+        if (imgui.button("选择")) BuddySkillEdit.CurSelectSupportType = data;
+        imgui.pop_id();
+      },
+    },
+  ];
   static EmployedOtSkillListTableConfig: TableConfig<SkillDataEx> = [
     ...OtSkillTable.DefaultConfig,
     { key: "ownerName", label: "拥有者", display: (data) => imgui.text(data.OwnerNames.join(",")) },
@@ -300,9 +344,7 @@ export class BuddySkillEdit {
       label: "",
       display: (data, index) => {
         imgui.push_id(`选择${index}`);
-        if (imgui.button("选择")) {
-          BuddySkillEdit.CurrentSelectionSkill = data;
-        }
+        if (imgui.button("选择")) BuddySkillEdit.CurSelectSkill = data;
         imgui.pop_id();
       },
     },
@@ -315,16 +357,14 @@ export class BuddySkillEdit {
       label: "",
       display: (data, index) => {
         imgui.push_id(`选择${index}`);
-        if (imgui.button("选择")) {
-          BuddySkillEdit.CurrentSelectionSupport = data;
-        }
+        if (imgui.button("选择")) BuddySkillEdit.CurSelectSupportAction = data;
         imgui.pop_id();
       },
     },
   ];
   private static OtVariationMap = {
-    [OtVariation.Cat]: "猫",
-    [OtVariation.Dog]: "狗",
+    [OtVariation.OtAirou]: "猫",
+    [OtVariation.OtDog]: "狗",
   };
 
   static ui() {
@@ -335,31 +375,47 @@ export class BuddySkillEdit {
           return;
         }
 
-        if (this.CurrentSelectionSkill != undefined) {
+        if (this.CurSelectSkill != undefined) {
           imgui.text(
-            `当前选择技能: ${this.CurrentSelectionSkill.Name}(${this.OtVariationMap[this.CurrentSelectionSkill.OtVariation]})`,
+            `当前选择技能: ${this.CurSelectSkill.Name}(${this.OtVariationMap[this.CurSelectSkill.OtVariation]})`,
           );
           imgui.same_line();
-          if (imgui.button("取消选择")) {
-            this.CurrentSelectionSkill = undefined;
-          }
-        } else {
-          imgui.text("没有选择技能");
-        }
-        if (this.CurrentSelectionSupport != undefined) {
+          imgui.push_id("技能");
+          if (imgui.button("取消选择")) this.CurSelectSkill = undefined;
+          imgui.pop_id();
+        } else imgui.text("没有选择技能");
+
+        if (this.CurSelectSupportType != undefined) {
+          imgui.text(`当前选择支援类型: ${OtSupportTypeIdTool.getName(this.CurSelectSupportType)}`);
+          imgui.same_line();
+          imgui.push_id("支援类型");
+          if (imgui.button("取消选择")) this.CurSelectSupportType = undefined;
+          imgui.pop_id();
+        } else imgui.text("没有选择支援类型");
+
+        if (this.CurSelectSupportAction != undefined) {
           imgui.text(
-            `当前选择支援动作: ${this.CurrentSelectionSupport.Name}(Lv: ${this.CurrentSelectionSupport.OpenLv})`,
+            `当前选择支援动作: ${this.CurSelectSupportAction.Name}(Lv: ${this.CurSelectSupportAction.OpenLv})`,
           );
           imgui.same_line();
-          if (imgui.button("取消选择")) {
-            this.CurrentSelectionSupport = undefined;
-          }
-        } else {
-          imgui.text("没有选择支援动作");
-        }
+          imgui.push_id("支援动作");
+          if (imgui.button("取消选择")) this.CurSelectSupportAction = undefined;
+          imgui.pop_id();
+        } else imgui.text("没有选择支援动作");
+
+        imgui_extra.tree_node("支援类型库", () => {
+          const otSupportTypeIds = [
+            OtSupportTypeId.Fight,
+            OtSupportTypeId.Assist,
+            OtSupportTypeId.Heal,
+            OtSupportTypeId.Bomber,
+            OtSupportTypeId.Collect,
+          ];
+          imgui_extra.Components.table("支援类型表", otSupportTypeIds, this.SupportTypeIdTableConfig);
+        });
 
         imgui_extra.tree_node("已有技能和支援动作库", () => {
-          const otVariations = [OtVariation.Cat, OtVariation.Dog];
+          const otVariations = [OtVariation.OtAirou, OtVariation.OtDog];
           for (const otVariation of otVariations) {
             imgui_extra.tree_node(this.OtVariationMap[otVariation], () => {
               const employedOtomoDataList = OtomoTools.getEmployedOtomoDataList(DataManager, otVariation);
@@ -367,7 +423,7 @@ export class BuddySkillEdit {
                 const skillDataList = OtomoTools.getMergeSkillDataWithOwners(employedOtomoDataList);
                 OtSkillTable.UI(skillDataList, this.EmployedOtSkillListTableConfig);
               });
-              if (otVariation == OtVariation.Cat) {
+              if (otVariation == OtVariation.OtAirou) {
                 imgui_extra.tree_node("支援动作", () => {
                   const supportActionList = OtomoTools.getMergeSupportActionWithOwners(employedOtomoDataList);
                   OtSupportTable.UI(supportActionList, this.EmployedOtSupportListTableConfig);
@@ -394,15 +450,15 @@ export class BuddySkillEdit {
                     label: "",
                     display: (_data, index) => {
                       if (
-                        this.CurrentSelectionSkill != undefined &&
-                        otomoData.getVariation() == this.CurrentSelectionSkill.OtVariation
+                        this.CurSelectSkill != undefined &&
+                        otomoData.getVariation() == this.CurSelectSkill.OtVariation
                       ) {
-                        if (!otomoData.AllSkill.ContainsId(this.CurrentSelectionSkill.Id)) {
+                        if (!otomoData.AllSkill.ContainsId(this.CurSelectSkill.Id)) {
                           imgui.push_id(`覆盖${index}`);
                           if (imgui.button("覆盖")) {
                             otomoData.ClearEnableSkill();
-                            otomoData.AllSkill.RawData.call("set_Item", index, this.CurrentSelectionSkill.Id);
-                            this.CurrentSelectionSkill = undefined;
+                            otomoData.AllSkill.RawData.call("set_Item", index, this.CurSelectSkill.Id);
+                            this.CurSelectSkill = undefined;
                           }
                           imgui.pop_id();
                         } else {
@@ -423,6 +479,15 @@ export class BuddySkillEdit {
 
               if (otomoData.hasSupportInfo()) {
                 imgui_extra.tree_node("支援动作列表", () => {
+                  const supportType = otomoData.SupportInfo.getSupportType();
+                  imgui.text(`当前支援类型: ${OtSupportTypeIdTool.getName(supportType)}`);
+                  if (this.CurSelectSupportType != undefined && this.CurSelectSupportType != supportType) {
+                    imgui.same_line();
+                    if (imgui.button("覆盖")) {
+                      otomoData.SupportInfo.RawData.set_field("_SupportTypeId", this.CurSelectSupportType);
+                      this.CurSelectSupportType = undefined;
+                    }
+                  }
                   const supportActionList = otomoData.SupportInfo.getSupportActionList();
                   const EquippedTableConfig: TableConfig<SupportAction> = [
                     ...OtSupportTable.DefaultConfig,
@@ -430,16 +495,16 @@ export class BuddySkillEdit {
                       key: "cover",
                       label: "",
                       display: (_data, index) => {
-                        if (this.CurrentSelectionSupport != undefined) {
-                          if (!otomoData.SupportInfo.ContainsId(this.CurrentSelectionSupport.Id)) {
+                        if (this.CurSelectSupportAction != undefined) {
+                          if (!otomoData.SupportInfo.ContainsId(this.CurSelectSupportAction.Id)) {
                             imgui.push_id(`覆盖${index}`);
                             if (imgui.button("覆盖")) {
                               otomoData.SupportInfo.RawData.get_field<REManagedObject>("_SupportActionIdList").call(
                                 "Set",
                                 index,
-                                this.CurrentSelectionSupport.Id,
+                                this.CurSelectSupportAction.Id,
                               );
-                              this.CurrentSelectionSupport = undefined;
+                              this.CurSelectSupportAction = undefined;
                             }
                             imgui.pop_id();
                           } else {
