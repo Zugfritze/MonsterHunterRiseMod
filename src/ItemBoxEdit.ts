@@ -49,10 +49,10 @@ export class ItemBoxEdit {
     {
       key: "select",
       label: "",
-      display: (_data, index) => {
+      display: (data, index) => {
         imgui.push_id(`选择${index}`);
         if (imgui.button("选择")) {
-          ItemBoxEdit.Item_box_slot = index;
+          ItemBoxEdit.Item_box_slot = data.Index;
         }
         imgui.pop_id();
       },
