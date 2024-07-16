@@ -8,6 +8,8 @@ npm install
 npm run build
 ```
 
+还需要自行下载NotoSansSC-Bold.otf字体放到`游戏根目录\reframework\fonts`下
+
 ## TypeScriptToLua的限制
 
 不支持在静态字段/字段(不确定)中使用this<br>
