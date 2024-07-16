@@ -1,6 +1,8 @@
 import { Utils } from "./Utils";
 import { ConfigManager } from "./ConfigManager";
 import { imgui_extra } from "./Tools/imgui_extra";
+import { Debug } from "./Debug";
+import { KeysOfType } from "./Tools/Types";
 
 enum DecorationEquipStatusTypes {
   OK = 0,
@@ -14,14 +16,42 @@ enum DecorationEquipStatusTypes {
   Error = 8,
 }
 
+enum DecorationsSlotLvTypes {
+  Lv1 = 1,
+  Lv2 = 2,
+  Lv3 = 3,
+  Lv4 = 4,
+}
+
 class OtherConfig {
   autoSaveInterval: number = 0;
   ignoresDecorationsSlotLv: boolean = false;
+  allDecorationRequiresSlotLvBecomeLv1: boolean = false;
+  allDecorationSkillLvMax: boolean = false;
 }
+
+const t_data_shortcut = sdk.find_type_definition("snow.data.DataShortcut");
+Debug.add_TypeDefinition(t_data_shortcut);
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.gui.fsm.deco.GuiDecoChange"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.DecorationsInventoryData"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.DecorationsData"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.DecorationBaseData"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.DecorationsBaseUserData"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.DecorationsBaseUserData.Param"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.DecorationsBaseUserData.ParamBase"));
+const getMaxLv = t_data_shortcut.get_method("getMaxLv(snow.data.DataDef.PlEquipSkillId)");
 
 export class Other {
   static lastSaveAt = 0;
   private static config = new ConfigManager("BPQSMHRMod/other.json", new OtherConfig());
+  private static uiCheckboxConfigItems: {
+    label: string;
+    key: KeysOfType<OtherConfig, boolean>;
+  }[] = [
+    { label: "忽略装饰品槽位等级限制", key: "ignoresDecorationsSlotLv" },
+    { label: "所有装饰品的槽位等级需求变为1级(需重启)", key: "allDecorationRequiresSlotLvBecomeLv1" },
+    { label: "所有装饰品的技能等级变成最大值(需重启)", key: "allDecorationSkillLvMax" },
+  ];
 
   static ui() {
     imgui_extra.tree_node("其他", () => {
@@ -29,12 +59,11 @@ export class Other {
       if (aSI_Changed) {
         this.config.set("autoSaveInterval", aSI_Value);
       }
-      const [iDS_Changed, iDS_Value] = imgui.checkbox(
-        "忽略装饰品槽位等级限制",
-        this.config.get("ignoresDecorationsSlotLv"),
-      );
-      if (iDS_Changed) {
-        this.config.set("ignoresDecorationsSlotLv", iDS_Value);
+      for (const uiCheckboxConfigItem of this.uiCheckboxConfigItems) {
+        const [changed, value] = imgui.checkbox(uiCheckboxConfigItem.label, this.config.get(uiCheckboxConfigItem.key));
+        if (changed) {
+          this.config.set(uiCheckboxConfigItem.key, value);
+        }
       }
     });
   }
@@ -71,6 +100,30 @@ export class Other {
       "checkEquipStatus(System.Int32, snow.equip.DecorationsId)",
       undefined,
       checkEquipStatusPostFunction,
+    );
+    Utils.hookMethod(
+      "snow.data.DecorationBaseData",
+      "initSkillData(snow.data.DecorationsBaseUserData.Param)",
+      (args) => {
+        const Param = sdk.to_managed_object(args[3]);
+
+        if (this.config.get("allDecorationRequiresSlotLvBecomeLv1")) {
+          Param.set_field("_DecorationLv", DecorationsSlotLvTypes.Lv1);
+        }
+
+        if (this.config.get("allDecorationSkillLvMax")) {
+          const SkillIdList = Param.get_field<REManagedObject>("_SkillIdList");
+          const SkillIdList_Count = SkillIdList.call<[], number>("get_Count");
+          const SkillLvList = Param.get_field<REManagedObject>("_SkillLvList");
+          for (let i = 0; i < SkillIdList_Count; i++) {
+            const SkillId = SkillIdList.call<[number], number>("Get", i);
+            if (SkillId != 0) {
+              SkillLvList.call("Set", i, getMaxLv.call<null, [number], number>(null, SkillId));
+            }
+          }
+        }
+        return sdk.PreHookResult.CALL_ORIGINAL;
+      },
     );
   }
 }
