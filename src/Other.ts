@@ -23,11 +23,19 @@ enum DecorationsSlotLvTypes {
   Lv4 = 4,
 }
 
+const decorationsSlotLvTypes = [
+  DecorationsSlotLvTypes.Lv1,
+  DecorationsSlotLvTypes.Lv2,
+  DecorationsSlotLvTypes.Lv3,
+  DecorationsSlotLvTypes.Lv4,
+];
+
 class OtherConfig {
   autoSaveInterval: number = 0;
   ignoresDecorationsSlotLv: boolean = false;
   allDecorationRequiresSlotLvBecomeLv1: boolean = false;
   allDecorationSkillLvMax: boolean = false;
+  allArmorDecoSlotsBecome3PcsLv4: boolean = false;
 }
 
 const t_data_shortcut = sdk.find_type_definition("snow.data.DataShortcut");
@@ -39,6 +47,11 @@ Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.DecorationBaseData"
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.DecorationsBaseUserData"));
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.DecorationsBaseUserData.Param"));
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.DecorationsBaseUserData.ParamBase"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.EquipmentInventoryData"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.EquipData"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.ArmorData"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.ArmorBaseData"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.ArmorBaseUserData.Param"));
 const getMaxLv = t_data_shortcut.get_method("getMaxLv(snow.data.DataDef.PlEquipSkillId)");
 
 export class Other {
@@ -51,6 +64,7 @@ export class Other {
     { label: "忽略装饰品槽位等级限制", key: "ignoresDecorationsSlotLv" },
     { label: "所有装饰品的槽位等级需求变为1级(需重启)", key: "allDecorationRequiresSlotLvBecomeLv1" },
     { label: "所有装饰品的技能等级变成最大值(需重启)", key: "allDecorationSkillLvMax" },
+    { label: "所有防具的装饰品槽位变成3个4级槽位(需重启)", key: "allArmorDecoSlotsBecome3PcsLv4" },
   ];
 
   static ui() {
@@ -106,11 +120,9 @@ export class Other {
       "initSkillData(snow.data.DecorationsBaseUserData.Param)",
       (args) => {
         const Param = sdk.to_managed_object(args[3]);
-
         if (this.config.get("allDecorationRequiresSlotLvBecomeLv1")) {
           Param.set_field("_DecorationLv", DecorationsSlotLvTypes.Lv1);
         }
-
         if (this.config.get("allDecorationSkillLvMax")) {
           const SkillIdList = Param.get_field<REManagedObject>("_SkillIdList");
           const SkillIdList_Count = SkillIdList.call<[], number>("get_Count");
@@ -125,5 +137,20 @@ export class Other {
         return sdk.PreHookResult.CALL_ORIGINAL;
       },
     );
+
+    Utils.hookMethod("snow.data.ArmorBaseData", ".ctor(snow.data.ArmorBaseUserData.Param)", (args) => {
+      if (this.config.get("allArmorDecoSlotsBecome3PcsLv4")) {
+        const Param = sdk.to_managed_object(args[3]);
+        const DecorationsNumList = Param.get_field<REManagedObject>("_DecorationsNumList");
+        for (const slotLvType of decorationsSlotLvTypes) {
+          const index = slotLvType - 1;
+          if (slotLvType != DecorationsSlotLvTypes.Lv4) {
+            DecorationsNumList.call("Set", index, 0);
+          } else {
+            DecorationsNumList.call("Set", index, 3);
+          }
+        }
+      }
+    });
   }
 }

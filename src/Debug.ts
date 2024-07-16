@@ -30,6 +30,12 @@ class TypeOptions {
   method: MethodCategoryOptions = new MethodCategoryOptions();
 }
 
+class MonitoringOptions {
+  searchText: string = "";
+  searchByKey: boolean = true;
+  searchByData: boolean = true;
+}
+
 interface MonitoringData {
   key: string;
   data: string;
@@ -38,6 +44,7 @@ interface MonitoringData {
 
 export class Debug {
   private static MonitoringDataList: MonitoringData[] = [];
+  private static MonitoringOptions: MonitoringOptions = new MonitoringOptions();
   private static TypeDefinitions: Map<RETypeDefinition, TypeOptions> = new Map();
   private static MonitoringTableConfig: TableConfig<MonitoringData> = [
     { key: "key", label: "Key", display: (data) => imgui.text(data.key) },
@@ -103,8 +110,19 @@ export class Debug {
   static ui() {
     imgui_extra.tree_node("调试", () => {
       imgui_extra.tree_node("监视", () => {
+        Components.searchAndCheckboxes("搜索", this.MonitoringOptions, [
+          { key: "searchByKey", label: "搜索Key" },
+          { key: "searchByData", label: "搜索数据", same_line: true },
+        ]);
+        const filterMonitoringDataList = this.MonitoringDataList.filter((monitoringData) => {
+          return (
+            this.MonitoringOptions.searchText == "" ||
+            (this.MonitoringOptions.searchByKey && monitoringData.key.includes(this.MonitoringOptions.searchText)) ||
+            (this.MonitoringOptions.searchByData && monitoringData.data.includes(this.MonitoringOptions.searchText))
+          );
+        });
         imgui.text(`当前时间: ${os.date("%X")}`);
-        Components.table("监视表", this.MonitoringDataList, this.MonitoringTableConfig);
+        Components.table("监视表", filterMonitoringDataList, this.MonitoringTableConfig);
       });
       imgui_extra.tree_node("类型定义", () => {
         for (const [TypeDefinition, TypeOptions] of this.TypeDefinitions) {
