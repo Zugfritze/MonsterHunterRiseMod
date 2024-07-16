@@ -13,7 +13,11 @@ declare namespace sdk {
     ignore_jmp?: boolean,
   ): void;
 
+  function to_managed_object(value: any): REManagedObject;
+
   function to_int64(value: any): number;
+
+  function to_ptr(value: any): any;
 
   enum PreHookResult {
     CALL_ORIGINAL,

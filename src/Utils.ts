@@ -27,7 +27,7 @@ export class Utils {
     typeName: string,
     methodName: string,
     preFunction?: (this: void, ...args: any[]) => any,
-    postFunction?: (this: void, ...args: any[]) => any,
+    postFunction?: (this: void, retval: any) => any,
   ): void {
     const methodDef = sdk.find_type_definition(typeName).get_method(methodName);
     sdk.hook(methodDef, preFunction, postFunction);
