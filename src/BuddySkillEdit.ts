@@ -9,6 +9,8 @@ enum OtVariation {
   OtDog = 1,
 }
 
+const otVariation = [OtVariation.OtAirou, OtVariation.OtDog];
+
 class SkillData {
   private static getSkillIconColor: REMethodDefinition = t_data_shortcut.get_method(
     "getIconColor(snow.otomo.OtomoDef.OtVariation, snow.data.DataDef.OtSkillId)",
@@ -91,6 +93,14 @@ enum OtSupportTypeId {
   Bomber = 3,
   Collect = 4,
 }
+
+const otSupportTypeId = [
+  OtSupportTypeId.Fight,
+  OtSupportTypeId.Assist,
+  OtSupportTypeId.Heal,
+  OtSupportTypeId.Bomber,
+  OtSupportTypeId.Collect,
+];
 
 class OtSupportTypeIdTool {
   private static getNameMD: REMethodDefinition = t_data_shortcut.get_method(
@@ -400,24 +410,16 @@ export class BuddySkillEdit {
         } else imgui.text("没有选择支援动作");
 
         imgui_extra.tree_node("库", () => {
-          const otVariations = [OtVariation.OtAirou, OtVariation.OtDog];
-          for (const otVariation of otVariations) {
-            imgui_extra.tree_node(this.OtVariationMap[otVariation], () => {
-              const employedOtomoDataList = OtomoTools.getEmployedOtomoDataList(DataManager, otVariation);
+          for (const variation of otVariation) {
+            imgui_extra.tree_node(this.OtVariationMap[variation], () => {
+              const employedOtomoDataList = OtomoTools.getEmployedOtomoDataList(DataManager, variation);
               imgui_extra.tree_node("已有技能", () => {
                 const skillDataList = OtomoTools.getMergeSkillDataWithOwners(employedOtomoDataList);
                 OtSkillTable.UI(skillDataList, this.EmployedOtSkillListTableConfig);
               });
-              if (otVariation == OtVariation.OtAirou) {
+              if (variation == OtVariation.OtAirou) {
                 imgui_extra.tree_node("支援类型", () => {
-                  const otSupportTypeIds = [
-                    OtSupportTypeId.Fight,
-                    OtSupportTypeId.Assist,
-                    OtSupportTypeId.Heal,
-                    OtSupportTypeId.Bomber,
-                    OtSupportTypeId.Collect,
-                  ];
-                  imgui_extra.Components.table("支援类型表", otSupportTypeIds, this.SupportTypeIdTableConfig);
+                  imgui_extra.Components.table("支援类型表", otSupportTypeId, this.SupportTypeIdTableConfig);
                 });
                 imgui_extra.tree_node("已有支援动作", () => {
                   const supportActionList = OtomoTools.getMergeSupportActionWithOwners(employedOtomoDataList);
