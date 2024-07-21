@@ -20,43 +20,17 @@ export class Character {
     max: number;
     float: boolean;
   }[] = [
-    {
-      label: "额外攻击力",
-      key: "attack",
-      min: 0,
-      max: 2600,
-      float: false,
-    },
-    {
-      label: "额外防御力",
-      key: "defence",
-      min: 0,
-      max: 3100,
-      float: false,
-    },
-    {
-      label: "每秒生命恢复百分比",
-      key: "PercentageVitalRecovery",
-      min: 0,
-      max: 100,
-      float: true,
-    },
+    { label: "额外攻击力", key: "attack", min: 0, max: 2600, float: false },
+    { label: "额外防御力", key: "defence", min: 0, max: 3100, float: false },
+    { label: "每秒生命恢复百分比", key: "PercentageVitalRecovery", min: 0, max: 100, float: true },
   ];
   private static modifyStatConfig: {
     key: KeysOfType<CharacterConfig, number>;
     field: string;
     modifyFlag: boolean;
   }[] = [
-    {
-      key: "attack",
-      field: "_AtkUpAlive",
-      modifyFlag: false,
-    },
-    {
-      key: "defence",
-      field: "_DefUpAlive",
-      modifyFlag: false,
-    },
+    { key: "attack", field: "_AtkUpAlive", modifyFlag: false },
+    { key: "defence", field: "_DefUpAlive", modifyFlag: false },
   ];
 
   static ui() {

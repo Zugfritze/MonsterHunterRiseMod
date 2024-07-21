@@ -3,30 +3,37 @@ import { Utils } from "./Utils";
 import Components = imgui_extra.Components;
 import TableConfig = imgui_extra.Components.TableConfig;
 
-class ItemData {
+class ItemDataReader {
   private static t_DataShortcut = sdk.find_type_definition("snow.data.DataShortcut");
-  private static getName = ItemData.t_DataShortcut.get_method("getName(snow.data.ContentsIdSystem.ItemId)");
+  private static getName = ItemDataReader.t_DataShortcut.get_method("getName(snow.data.ContentsIdSystem.ItemId)");
   private static t_ItemInventoryData = sdk.find_type_definition("snow.data.ItemInventoryData");
-  private static getId: REMethodDefinition = ItemData.t_ItemInventoryData.get_method("getId");
-  private static getNum: REMethodDefinition = ItemData.t_ItemInventoryData.get_method("getNum");
+  private static getId: REMethodDefinition = ItemDataReader.t_ItemInventoryData.get_method("getId");
+  private static getNum: REMethodDefinition = ItemDataReader.t_ItemInventoryData.get_method("getNum");
   RawData: REManagedObject;
-  Index: number;
 
-  constructor(itemData: REManagedObject, index: number) {
+  constructor(itemData: REManagedObject) {
     this.RawData = itemData;
-    this.Index = index;
   }
 
   get_id(): number {
-    return ItemData.getId.call(this.RawData);
+    return ItemDataReader.getId.call(this.RawData);
   }
 
   get_name(): string {
-    return ItemData.getName.call(null, this.get_id());
+    return ItemDataReader.getName.call(null, this.get_id());
   }
 
   get_num(): number {
-    return ItemData.getNum.call(this.RawData);
+    return ItemDataReader.getNum.call(this.RawData);
+  }
+}
+
+class ItemData extends ItemDataReader {
+  Index: number;
+
+  constructor(itemData: REManagedObject, index: number) {
+    super(itemData);
+    this.Index = index;
   }
 }
 
@@ -112,8 +119,8 @@ export class ItemBoxEdit {
         if (Item_box_slot_changed) {
           this.Item_box_slot = Item_box_slot_value;
         }
-        const itemData = itemDataList[this.Item_box_slot];
-        if (itemData == undefined) {
+        const itemData = new ItemDataReader(this.get_Item.call(itemList, this.Item_box_slot));
+        if (itemData.get_id() == 67108864) {
           imgui.text("这个槽位是空的");
         } else {
           imgui.text(`物品ID: ${itemData.get_id()} 名称: ${itemData.get_name()} 数量: ${itemData.get_num()}`);
