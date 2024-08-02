@@ -2,6 +2,7 @@ import { Character } from "./Character";
 import { ItemBoxEdit } from "./ItemBoxEdit";
 import { InfiniteConsumables } from "./InfiniteConsumables";
 import { BuddySkillEdit } from "./BuddySkillEdit";
+import { TalismanEdit } from "./TalismanEdit";
 import { Debug } from "./Debug";
 import { Other } from "./Other";
 import { imgui_extra } from "./Tools/imgui_extra";
@@ -39,6 +40,7 @@ class Main {
           ItemBoxEdit.ui();
           InfiniteConsumables.ui();
           BuddySkillEdit.ui();
+          TalismanEdit.ui();
           Other.ui();
           Debug.ui();
           imgui.end_window();

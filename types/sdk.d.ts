@@ -6,6 +6,8 @@ declare namespace sdk {
 
   function find_type_definition(name: string): RETypeDefinition;
 
+  function create_managed_array(type: string | RETypeDefinition, length: number): REManagedObject;
+
   function hook(
     method_definition: REMethodDefinition,
     pre_func?: (this: void, ...args: any[]) => any,

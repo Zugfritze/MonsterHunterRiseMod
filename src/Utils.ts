@@ -38,3 +38,23 @@ export class Utils {
     return snowGameManager != undefined && this.getStatus.call(snowGameManager) == 1;
   }
 }
+
+export class REArray<T> {
+  readonly RawData: REManagedObject;
+
+  constructor(RawData: REManagedObject) {
+    this.RawData = RawData;
+  }
+
+  get(index: number): T {
+    return this.RawData.call<[number], T>("Get", index);
+  }
+
+  set(index: number, value: T) {
+    this.RawData.call<[number, T], null>("Set", index, value);
+  }
+
+  getCapacity(): number {
+    return this.RawData.call<[], number>("get_Count");
+  }
+}
