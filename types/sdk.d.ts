@@ -8,6 +8,8 @@ declare namespace sdk {
 
   function create_managed_array(type: string | RETypeDefinition, length: number): REManagedObject;
 
+  function create_uint32(value: number): REManagedObject;
+
   function hook(
     method_definition: REMethodDefinition,
     pre_func?: (this: void, ...args: any[]) => any,

@@ -1,4 +1,4 @@
-import { Utils } from "./Utils";
+import { REArray, Utils } from "./Utils";
 import { ConfigManager } from "./ConfigManager";
 import { imgui_extra } from "./Tools/imgui_extra";
 import { Debug } from "./Debug";
@@ -37,6 +37,7 @@ class OtherConfig {
   allDecorationSkillLvMax: boolean = false;
   allArmorDecoSlotsBecome3PcsLv4: boolean = false;
   allArmorSkillLvMax: boolean = false;
+  specialSkewerDangoLvAllLv4: boolean = false;
 }
 
 const t_data_shortcut = sdk.find_type_definition("snow.data.DataShortcut");
@@ -67,6 +68,7 @@ export class Other {
     { label: "所有装饰品的技能等级变成最大值(需重启)", key: "allDecorationSkillLvMax" },
     { label: "所有防具的装饰品槽位变成3个4级槽位(需重启)", key: "allArmorDecoSlotsBecome3PcsLv4" },
     { label: "所有防具的技能等级变成最大值(需重启)", key: "allArmorSkillLvMax" },
+    { label: "使用曙光新签时团子技能全部变成4级(需重启)", key: "specialSkewerDangoLvAllLv4" },
   ];
 
   static ui() {
@@ -167,5 +169,19 @@ export class Other {
         }
       }
     });
+
+    if (this.config.get("specialSkewerDangoLvAllLv4")) {
+      const types = [
+        sdk.find_type_definition("snow.facility.kitchen.MealFunc"),
+        sdk.find_type_definition("snow.gui.fsm.kitchen.GuiKitchen"),
+      ];
+      for (const type of types) {
+        const SpecialSkewerDangoLvField = type.get_field("SpecialSkewerDangoLv");
+        const SpecialSkewerDangoLv = new REArray<number>(SpecialSkewerDangoLvField.get_data(null));
+        for (let i = 0; i < 3; i++) {
+          SpecialSkewerDangoLv.set(i, 4);
+        }
+      }
+    }
   }
 }
