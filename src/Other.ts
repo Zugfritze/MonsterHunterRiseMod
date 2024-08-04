@@ -36,6 +36,7 @@ class OtherConfig {
   allDecorationRequiresSlotLvBecomeLv1: boolean = false;
   allDecorationSkillLvMax: boolean = false;
   allArmorDecoSlotsBecome3PcsLv4: boolean = false;
+  allArmorSkillLvMax: boolean = false;
 }
 
 const t_data_shortcut = sdk.find_type_definition("snow.data.DataShortcut");
@@ -65,6 +66,7 @@ export class Other {
     { label: "所有装饰品的槽位等级需求变为1级(需重启)", key: "allDecorationRequiresSlotLvBecomeLv1" },
     { label: "所有装饰品的技能等级变成最大值(需重启)", key: "allDecorationSkillLvMax" },
     { label: "所有防具的装饰品槽位变成3个4级槽位(需重启)", key: "allArmorDecoSlotsBecome3PcsLv4" },
+    { label: "所有防具的技能等级变成最大值(需重启)", key: "allArmorSkillLvMax" },
   ];
 
   static ui() {
@@ -139,8 +141,9 @@ export class Other {
     );
 
     Utils.hookMethod("snow.data.ArmorBaseData", ".ctor(snow.data.ArmorBaseUserData.Param)", (args) => {
+      const Param = sdk.to_managed_object(args[3]);
+
       if (this.config.get("allArmorDecoSlotsBecome3PcsLv4")) {
-        const Param = sdk.to_managed_object(args[3]);
         const DecorationsNumList = Param.get_field<REManagedObject>("_DecorationsNumList");
         for (const slotLvType of decorationsSlotLvTypes) {
           const index = slotLvType - 1;
@@ -148,6 +151,18 @@ export class Other {
             DecorationsNumList.call("Set", index, 0);
           } else {
             DecorationsNumList.call("Set", index, 3);
+          }
+        }
+      }
+
+      if (this.config.get("allArmorSkillLvMax")) {
+        const SkillIdList = Param.get_field<REManagedObject>("_SkillList");
+        const SkillIdList_Count = SkillIdList.call<[], number>("get_Count");
+        const SkillLvList = Param.get_field<REManagedObject>("_SkillLvList");
+        for (let i = 0; i < SkillIdList_Count; i++) {
+          const SkillId = SkillIdList.call<[number], number>("Get", i);
+          if (SkillId != 0) {
+            SkillLvList.call("Set", i, getMaxLv.call<null, [number], number>(null, SkillId));
           }
         }
       }
