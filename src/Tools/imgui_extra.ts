@@ -164,7 +164,7 @@ export namespace imgui_extra {
     export type TableConfig<T> = { key: string; label: string; display: (data: T, index: number) => void }[];
 
     export function table<T>(tableId: string, data: T[], config: TableConfig<T>) {
-      if (imgui.begin_table(tableId, config.length, ImGuiTableFlags.Borders)) {
+      if (imgui.begin_table(tableId, config.length, ImGuiTableFlags.Borders | ImGuiTableFlags.NoHostExtendX)) {
         for (const configItem of config) {
           imgui.table_setup_column(configItem.label);
         }

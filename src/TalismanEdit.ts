@@ -1,6 +1,7 @@
 import { imgui_extra } from "./Tools/imgui_extra";
 import { REArray, Utils } from "./Utils";
 import { Debug } from "./Debug";
+import { SkillData, SkillInfo } from "./Type";
 import Components = imgui_extra.Components;
 import TableConfig = imgui_extra.Components.TableConfig;
 
@@ -31,51 +32,16 @@ enum IdTypes {
   LvBuffCage = 4,
 }
 
-Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.DataDef.PlEquipSkillId[]"));
-const t_data_shortcut = sdk.find_type_definition("snow.data.DataShortcut");
 const t_equipment_inventory_data = sdk.find_type_definition("snow.data.EquipmentInventoryData");
 
-namespace SkillInfo {
-  const m_getName = t_data_shortcut.get_method("getName(snow.data.DataDef.PlEquipSkillId)");
-  const m_getExplain = t_data_shortcut.get_method("getExplain(snow.data.DataDef.PlEquipSkillId)");
-  const m_getMaxLv = t_data_shortcut.get_method("getMaxLv(snow.data.DataDef.PlEquipSkillId)");
-
-  export function getName(SkillId: number): string {
-    return m_getName.call<null, [number], string>(null, SkillId);
-  }
-
-  export function getExplain(SkillId: number): string {
-    return m_getExplain.call<null, [number], string>(null, SkillId);
-  }
-
-  export function getMaxLv(SkillId: number): number {
-    return m_getMaxLv.call<null, [number], number>(null, SkillId);
-  }
-}
-
-class SkillData {
+class SkillDataEx extends SkillData {
   readonly Owner: TalismanData;
   readonly Index: number;
-  readonly Id: number;
-  readonly Lv: number;
 
   constructor(Owner: TalismanData, Index: number, Id: number, Lv: number) {
+    super(Id, Lv);
     this.Owner = Owner;
     this.Index = Index;
-    this.Id = Id;
-    this.Lv = Lv;
-  }
-
-  getName(): string {
-    return SkillInfo.getName(this.Id);
-  }
-
-  getExplain(): string {
-    return SkillInfo.getExplain(this.Id);
-  }
-
-  getMaxLv(): number {
-    return SkillInfo.getMaxLv(this.Id);
   }
 }
 
@@ -113,13 +79,13 @@ class TalismanData {
     return this.SkillIdList.getCapacity();
   }
 
-  getSkillDataList(): SkillData[] {
-    const skillDataList: SkillData[] = [];
+  getSkillDataList(): SkillDataEx[] {
+    const skillDataList: SkillDataEx[] = [];
     for (let i = 0; i < this.getMaxSkillNum(); i++) {
       const id = this.SkillIdList.get(i);
       const lv = this.SkillLvList.get(i);
       if (id != 0) {
-        skillDataList.push(new SkillData(this, i, id, lv));
+        skillDataList.push(new SkillDataEx(this, i, id, lv));
       }
     }
     return skillDataList;
@@ -137,7 +103,7 @@ class TalismanData {
 }
 
 class TableConfigPresets {
-  static SkillData: TableConfig<SkillData> = [
+  static SkillData: TableConfig<SkillDataEx> = [
     { key: "SkillName", label: "技能名称", display: (data) => imgui.text(data.getName()) },
     { key: "SkillExplain", label: "技能描述", display: (data) => imgui.text(data.getExplain()) },
     {

@@ -3,7 +3,7 @@ export class Utils {
   private static t_SnowGameManager: RETypeDefinition = sdk.find_type_definition("snow.SnowGameManager");
   private static getStatus: REMethodDefinition = Utils.t_SnowGameManager.get_method("getStatus");
 
-  static getPlayerBase(): REManagedObject {
+  static getPlayerBase(): REManagedObject | undefined {
     if (this.playerInput == undefined) {
       const inputManager = sdk.get_managed_singleton("snow.StmInputManager");
       const inGameInputDevice: REManagedObject = inputManager.get_field("_InGameInputDevice");

@@ -12,6 +12,8 @@ declare class RETypeDefinition {
   get_field(name: string): REField;
 
   get_fields(): REField[];
+
+  get_parent_type(): RETypeDefinition;
 }
 
 declare class REField {

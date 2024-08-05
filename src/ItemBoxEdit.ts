@@ -1,11 +1,11 @@
 import { imgui_extra } from "./Tools/imgui_extra";
 import { Utils } from "./Utils";
+import { t_DataShortcut } from "./Type";
 import Components = imgui_extra.Components;
 import TableConfig = imgui_extra.Components.TableConfig;
 
 class ItemDataReader {
-  private static t_DataShortcut = sdk.find_type_definition("snow.data.DataShortcut");
-  private static getName = ItemDataReader.t_DataShortcut.get_method("getName(snow.data.ContentsIdSystem.ItemId)");
+  private static getName = t_DataShortcut.get_method("getName(snow.data.ContentsIdSystem.ItemId)");
   private static t_ItemInventoryData = sdk.find_type_definition("snow.data.ItemInventoryData");
   private static getId: REMethodDefinition = ItemDataReader.t_ItemInventoryData.get_method("getId");
   private static getNum: REMethodDefinition = ItemDataReader.t_ItemInventoryData.get_method("getNum");

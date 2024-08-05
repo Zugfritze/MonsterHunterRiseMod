@@ -3,6 +3,7 @@ import { ItemBoxEdit } from "./ItemBoxEdit";
 import { InfiniteConsumables } from "./InfiniteConsumables";
 import { BuddySkillEdit } from "./BuddySkillEdit";
 import { TalismanEdit } from "./TalismanEdit";
+import { PlayerSkillListCompare } from "./PlayerSkillListCompare";
 import { Debug } from "./Debug";
 import { Other } from "./Other";
 import { imgui_extra } from "./Tools/imgui_extra";
@@ -41,6 +42,7 @@ class Main {
           InfiniteConsumables.ui();
           BuddySkillEdit.ui();
           TalismanEdit.ui();
+          PlayerSkillListCompare.ui();
           Other.ui();
           Debug.ui();
           imgui.end_window();

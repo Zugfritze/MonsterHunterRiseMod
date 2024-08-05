@@ -68,7 +68,7 @@ export class InfiniteConsumables {
     Utils.hookMethod("snow.envCreature.EnvironmentCreatureManager", "addEc057UseCount", (args) => {
       if (this.config.get("infiniteEndemicLife")) {
         const playerBase = Utils.getPlayerBase();
-        if (playerBase.get_field("_PlayerIndex") == sdk.to_int64(args[3])) {
+        if (playerBase != undefined && playerBase.get_field("_PlayerIndex") == sdk.to_int64(args[3])) {
           return sdk.PreHookResult.SKIP_ORIGINAL;
         }
       }
@@ -77,6 +77,9 @@ export class InfiniteConsumables {
     Utils.hookMethod("snow.player.fsm.PlayerFsm2ActionHunterWire", "start", () => {
       if (this.config.get("infiniteWirebug")) {
         const playerBase = Utils.getPlayerBase();
+        if (playerBase == undefined) {
+          return sdk.PreHookResult.CALL_ORIGINAL;
+        }
         const wireGuages: REManagedObject | undefined = playerBase.get_field("_HunterWireGauge");
         if (wireGuages == undefined) return;
         const wireGuages_Count: number = wireGuages.call("get_Count");

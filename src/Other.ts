@@ -3,6 +3,7 @@ import { ConfigManager } from "./ConfigManager";
 import { imgui_extra } from "./Tools/imgui_extra";
 import { Debug } from "./Debug";
 import { KeysOfType } from "./Tools/Types";
+import { t_DataShortcut } from "./Type";
 
 enum DecorationEquipStatusTypes {
   OK = 0,
@@ -41,8 +42,7 @@ class OtherConfig {
   allDango100: boolean = false;
 }
 
-const t_data_shortcut = sdk.find_type_definition("snow.data.DataShortcut");
-Debug.add_TypeDefinition(t_data_shortcut);
+Debug.add_TypeDefinition(t_DataShortcut);
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.gui.fsm.deco.GuiDecoChange"));
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.DecorationsInventoryData"));
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.DecorationsData"));
@@ -55,7 +55,7 @@ Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.EquipData"));
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.ArmorData"));
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.ArmorBaseData"));
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.ArmorBaseUserData.Param"));
-const getMaxLv = t_data_shortcut.get_method("getMaxLv(snow.data.DataDef.PlEquipSkillId)");
+const getMaxLv = t_DataShortcut.get_method("getMaxLv(snow.data.DataDef.PlEquipSkillId)");
 
 export class Other {
   static lastSaveAt = 0;

@@ -1,8 +1,7 @@
 import { imgui_extra } from "./Tools/imgui_extra";
 import { Utils } from "./Utils";
+import { t_DataShortcut } from "./Type";
 import TableConfig = imgui_extra.Components.TableConfig;
-
-const t_data_shortcut = sdk.find_type_definition("snow.data.DataShortcut");
 
 enum OtVariation {
   OtAirou = 0,
@@ -12,17 +11,17 @@ enum OtVariation {
 const otVariation = [OtVariation.OtAirou, OtVariation.OtDog];
 
 class SkillData {
-  private static getSkillIconColor: REMethodDefinition = t_data_shortcut.get_method(
+  private static getSkillIconColor: REMethodDefinition = t_DataShortcut.get_method(
     "getIconColor(snow.otomo.OtomoDef.OtVariation, snow.data.DataDef.OtSkillId)",
   );
-  private static getSkillName: REMethodDefinition = t_data_shortcut.get_method("getName(snow.data.DataDef.OtSkillId)");
-  private static getSkillExplain: REMethodDefinition = t_data_shortcut.get_method(
+  private static getSkillName: REMethodDefinition = t_DataShortcut.get_method("getName(snow.data.DataDef.OtSkillId)");
+  private static getSkillExplain: REMethodDefinition = t_DataShortcut.get_method(
     "getExplain(snow.data.DataDef.OtSkillId)",
   );
-  private static getSkillUnlockLv: REMethodDefinition = t_data_shortcut.get_method(
+  private static getSkillUnlockLv: REMethodDefinition = t_DataShortcut.get_method(
     "getUnlockLv(snow.otomo.OtomoDef.OtVariation, snow.data.DataDef.OtSkillId)",
   );
-  private static getSkillSlotNum: REMethodDefinition = t_data_shortcut.get_method(
+  private static getSkillSlotNum: REMethodDefinition = t_DataShortcut.get_method(
     "getSlotNum(snow.otomo.OtomoDef.OtVariation, snow.data.DataDef.OtSkillId)",
   );
 
@@ -103,10 +102,10 @@ const otSupportTypeId = [
 ];
 
 class OtSupportTypeIdTool {
-  private static getNameMD: REMethodDefinition = t_data_shortcut.get_method(
+  private static getNameMD: REMethodDefinition = t_DataShortcut.get_method(
     "getName(snow.data.DataDef.OtSupportTypeId)",
   );
-  private static getExplainMD: REMethodDefinition = t_data_shortcut.get_method(
+  private static getExplainMD: REMethodDefinition = t_DataShortcut.get_method(
     "getExplain(snow.data.DataDef.OtSupportTypeId)",
   );
 
@@ -120,13 +119,13 @@ class OtSupportTypeIdTool {
 }
 
 class SupportAction {
-  private static getName: REMethodDefinition = t_data_shortcut.get_method(
+  private static getName: REMethodDefinition = t_DataShortcut.get_method(
     "getName(snow.data.DataDef.OtSupportActionId)",
   );
-  private static getExplain: REMethodDefinition = t_data_shortcut.get_method(
+  private static getExplain: REMethodDefinition = t_DataShortcut.get_method(
     "getExplain(snow.data.DataDef.OtSupportActionId)",
   );
-  private static getOpenLv: REMethodDefinition = t_data_shortcut.get_method(
+  private static getOpenLv: REMethodDefinition = t_DataShortcut.get_method(
     "getOpenLv(snow.data.DataDef.OtSupportActionId)",
   );
 

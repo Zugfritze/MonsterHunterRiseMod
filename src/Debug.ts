@@ -163,6 +163,15 @@ export class Debug {
                 }
               });
             }
+
+            const parentType = TypeDefinition.get_parent_type();
+            if (parentType != undefined) {
+              imgui.text(`继承自${parentType.get_full_name()}`);
+              imgui.same_line();
+              if (imgui.button("添加")) {
+                Debug.add_TypeDefinition(parentType);
+              }
+            }
           });
         }
       });
