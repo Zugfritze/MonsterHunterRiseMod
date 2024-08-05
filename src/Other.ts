@@ -38,6 +38,7 @@ class OtherConfig {
   allArmorDecoSlotsBecome3PcsLv4: boolean = false;
   allArmorSkillLvMax: boolean = false;
   specialSkewerDangoLvAllLv4: boolean = false;
+  allDango100: boolean = false;
 }
 
 const t_data_shortcut = sdk.find_type_definition("snow.data.DataShortcut");
@@ -69,6 +70,7 @@ export class Other {
     { label: "所有防具的装饰品槽位变成3个4级槽位(需重启)", key: "allArmorDecoSlotsBecome3PcsLv4" },
     { label: "所有防具的技能等级变成最大值(需重启)", key: "allArmorSkillLvMax" },
     { label: "使用曙光新签时团子技能全部变成4级(需重启)", key: "specialSkewerDangoLvAllLv4" },
+    { label: "所有团子技能概率100%", key: "allDango100" },
   ];
 
   static ui() {
@@ -183,5 +185,12 @@ export class Other {
         }
       }
     }
+
+    Utils.hookMethod("snow.data.DangoData", "get_SkillActiveRate", undefined, (retval) => {
+      if (this.config.get("allDango100")) {
+        return sdk.to_ptr(200);
+      }
+      return retval;
+    });
   }
 }
