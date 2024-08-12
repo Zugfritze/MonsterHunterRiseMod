@@ -28,9 +28,10 @@ export class Utils {
     methodName: string,
     preFunction?: (this: void, ...args: any[]) => any,
     postFunction?: (this: void, retval: any) => any,
+    ignore_jmp?: boolean,
   ): void {
     const methodDef = sdk.find_type_definition(typeName).get_method(methodName);
-    sdk.hook(methodDef, preFunction, postFunction);
+    sdk.hook(methodDef, preFunction, postFunction, ignore_jmp);
   }
 
   static isInVillage(): boolean {

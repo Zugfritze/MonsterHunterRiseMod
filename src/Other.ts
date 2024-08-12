@@ -31,6 +31,55 @@ const decorationsSlotLvTypes = [
   DecorationsSlotLvTypes.Lv4,
 ];
 
+enum HyakuryuDecorationsSlotLvTypes {
+  Lv1 = 1,
+  Lv2 = 2,
+  Lv3 = 3,
+}
+
+const hyakuryuDecorationsSlotLvTypes = [
+  HyakuryuDecorationsSlotLvTypes.Lv1,
+  HyakuryuDecorationsSlotLvTypes.Lv2,
+  HyakuryuDecorationsSlotLvTypes.Lv3,
+];
+
+// snow.data.weapon.WeaponTypes
+enum WeaponTypes {
+  GreatSword = 0,
+  Hammer = 1,
+  Lance = 2,
+  ShortSword = 3,
+  LightBowgun = 4,
+  HeavyBowgun = 5,
+  DualBlades = 6,
+  LongSword = 7,
+  Horn = 8,
+  GunLance = 9,
+  Bow = 10,
+  SlashAxe = 11,
+  ChargeAxe = 12,
+  InsectGlaive = 13,
+  Insect = 14,
+}
+
+const weaponTypes = [
+  WeaponTypes.GreatSword,
+  WeaponTypes.Hammer,
+  WeaponTypes.Lance,
+  WeaponTypes.ShortSword,
+  WeaponTypes.LightBowgun,
+  WeaponTypes.HeavyBowgun,
+  WeaponTypes.DualBlades,
+  WeaponTypes.LongSword,
+  WeaponTypes.Horn,
+  WeaponTypes.GunLance,
+  WeaponTypes.Bow,
+  WeaponTypes.SlashAxe,
+  WeaponTypes.ChargeAxe,
+  WeaponTypes.InsectGlaive,
+  WeaponTypes.Insect,
+];
+
 class OtherConfig {
   autoSaveInterval: number = 0;
   ignoresDecorationsSlotLv: boolean = false;
@@ -38,6 +87,8 @@ class OtherConfig {
   allDecorationSkillLvMax: boolean = false;
   allArmorDecoSlotsBecome3PcsLv4: boolean = false;
   allArmorSkillLvMax: boolean = false;
+  allWeaponDecoSlotsBecome3PcsLv4: boolean = false;
+  allWeaponHyakuryuDecoSlotLv3: boolean = false;
   specialSkewerDangoLvAllLv4: boolean = false;
   allDango100: boolean = false;
 }
@@ -55,6 +106,11 @@ Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.EquipData"));
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.ArmorData"));
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.ArmorBaseData"));
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.ArmorBaseUserData.Param"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.CloseRangeWeaponBaseData"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.BowWeaponBaseData"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.BulletWeaponBaseData"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.equip.MainWeaponBaseData"));
+Debug.add_TypeDefinition(sdk.find_type_definition("snow.player.PlayerSkillList"));
 const getMaxLv = t_DataShortcut.get_method("getMaxLv(snow.data.DataDef.PlEquipSkillId)");
 
 export class Other {
@@ -69,6 +125,8 @@ export class Other {
     { label: "所有装饰品的技能等级变成最大值(需重启)", key: "allDecorationSkillLvMax" },
     { label: "所有防具的装饰品槽位变成3个4级槽位(需重启)", key: "allArmorDecoSlotsBecome3PcsLv4" },
     { label: "所有防具的技能等级变成最大值(需重启)", key: "allArmorSkillLvMax" },
+    { label: "所有武器的装饰品槽位变成3个4级槽位(需重启)", key: "allWeaponDecoSlotsBecome3PcsLv4" },
+    { label: "所有武器的百龙装饰品槽位变成3级(需重启)", key: "allWeaponHyakuryuDecoSlotLv3" },
     { label: "使用曙光新签时团子技能全部变成4级(需重启)", key: "specialSkewerDangoLvAllLv4" },
     { label: "所有团子技能概率100%", key: "allDango100" },
   ];
@@ -192,5 +250,62 @@ export class Other {
       }
       return retval;
     });
+
+    let thisObj: REManagedObject | undefined;
+    Utils.hookMethod(
+      "snow.equip.WeaponIdModule",
+      "initialize",
+      (args) => {
+        thisObj = sdk.to_managed_object(args[2]);
+      },
+      () => {
+        if (thisObj != undefined) {
+          const WeaponType = thisObj.get_field<WeaponTypes>("_WeaponType");
+          if (WeaponType != WeaponTypes.Insect) {
+            const BaseDataList = new REArray<REManagedObject>(
+              thisObj.get_field<REManagedObject>("<BaseDataList>k__BackingField"),
+            );
+            for (let i = 0; i < BaseDataList.getCapacity(); i++) {
+              const BaseData = BaseDataList.get(i);
+              if (BaseData != undefined) {
+                if (this.config.get("allWeaponDecoSlotsBecome3PcsLv4")) {
+                  const SlotNumList = new REArray<number>(BaseData.get_field<REManagedObject>("_SlotNumList"));
+                  for (const slotLvType of decorationsSlotLvTypes) {
+                    const index = slotLvType - 1;
+                    if (slotLvType != DecorationsSlotLvTypes.Lv4) {
+                      SlotNumList.set(index, 0);
+                    } else {
+                      SlotNumList.set(index, 3);
+                    }
+                  }
+                }
+
+                if (this.config.get("allWeaponHyakuryuDecoSlotLv3")) {
+                  const HyakuryuSlotNumList = new REArray<number>(
+                    BaseData.get_field<REManagedObject>("_HyakuryuSlotNumList"),
+                  );
+                  let shouldModify = false;
+                  for (const slotLvType of hyakuryuDecorationsSlotLvTypes) {
+                    const index = slotLvType - 1;
+                    if (HyakuryuSlotNumList.get(index) > 0) shouldModify = true;
+                  }
+                  if (shouldModify) {
+                    for (const slotLvType of hyakuryuDecorationsSlotLvTypes) {
+                      const index = slotLvType - 1;
+                      if (slotLvType != HyakuryuDecorationsSlotLvTypes.Lv3) {
+                        HyakuryuSlotNumList.set(index, 0);
+                      } else {
+                        HyakuryuSlotNumList.set(index, 1);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          thisObj = undefined;
+        }
+      },
+    );
   }
 }
