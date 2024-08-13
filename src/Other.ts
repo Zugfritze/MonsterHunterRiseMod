@@ -111,6 +111,9 @@ Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.BowWeaponBaseData")
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.data.BulletWeaponBaseData"));
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.equip.MainWeaponBaseData"));
 Debug.add_TypeDefinition(sdk.find_type_definition("snow.player.PlayerSkillList"));
+Debug.add_TypeDefinition(
+  sdk.find_type_definition("System.Collections.Generic.List`1<snow.data.equip.param.DecorationsSlotData>"),
+);
 const getMaxLv = t_DataShortcut.get_method("getMaxLv(snow.data.DataDef.PlEquipSkillId)");
 
 export class Other {
@@ -188,13 +191,13 @@ export class Other {
           Param.set_field("_DecorationLv", DecorationsSlotLvTypes.Lv1);
         }
         if (this.config.get("allDecorationSkillLvMax")) {
-          const SkillIdList = Param.get_field<REManagedObject>("_SkillIdList");
-          const SkillIdList_Count = SkillIdList.call<[], number>("get_Count");
-          const SkillLvList = Param.get_field<REManagedObject>("_SkillLvList");
-          for (let i = 0; i < SkillIdList_Count; i++) {
-            const SkillId = SkillIdList.call<[number], number>("Get", i);
+          const SkillIdList = new REArray<number>(Param.get_field<REManagedObject>("_SkillIdList"));
+          const SkillIdListCapacity = SkillIdList.getCapacity();
+          const SkillLvList = new REArray<number>(Param.get_field<REManagedObject>("_SkillLvList"));
+          for (let i = 0; i < SkillIdListCapacity; i++) {
+            const SkillId = SkillIdList.get(i);
             if (SkillId != 0) {
-              SkillLvList.call("Set", i, getMaxLv.call<null, [number], number>(null, SkillId));
+              SkillLvList.set(i, getMaxLv.call<null, [number], number>(null, SkillId));
             }
           }
         }
@@ -206,25 +209,25 @@ export class Other {
       const Param = sdk.to_managed_object(args[3]);
 
       if (this.config.get("allArmorDecoSlotsBecome3PcsLv4")) {
-        const DecorationsNumList = Param.get_field<REManagedObject>("_DecorationsNumList");
+        const DecorationsNumList = new REArray<number>(Param.get_field<REManagedObject>("_DecorationsNumList"));
         for (const slotLvType of decorationsSlotLvTypes) {
           const index = slotLvType - 1;
           if (slotLvType != DecorationsSlotLvTypes.Lv4) {
-            DecorationsNumList.call("Set", index, 0);
+            DecorationsNumList.set(index, 0);
           } else {
-            DecorationsNumList.call("Set", index, 3);
+            DecorationsNumList.set(index, 3);
           }
         }
       }
 
       if (this.config.get("allArmorSkillLvMax")) {
-        const SkillIdList = Param.get_field<REManagedObject>("_SkillList");
-        const SkillIdList_Count = SkillIdList.call<[], number>("get_Count");
-        const SkillLvList = Param.get_field<REManagedObject>("_SkillLvList");
-        for (let i = 0; i < SkillIdList_Count; i++) {
-          const SkillId = SkillIdList.call<[number], number>("Get", i);
+        const SkillIdList = new REArray<number>(Param.get_field<REManagedObject>("_SkillList"));
+        const SkillIdListCapacity = SkillIdList.getCapacity();
+        const SkillLvList = new REArray<number>(Param.get_field<REManagedObject>("_SkillLvList"));
+        for (let i = 0; i < SkillIdListCapacity; i++) {
+          const SkillId = SkillIdList.get(i);
           if (SkillId != 0) {
-            SkillLvList.call("Set", i, getMaxLv.call<null, [number], number>(null, SkillId));
+            SkillLvList.set(i, getMaxLv.call<null, [number], number>(null, SkillId));
           }
         }
       }
@@ -262,10 +265,11 @@ export class Other {
         if (thisObj != undefined) {
           const WeaponType = thisObj.get_field<WeaponTypes>("_WeaponType");
           if (WeaponType != WeaponTypes.Insect) {
-            const BaseDataList = new REArray<REManagedObject>(
+            const BaseDataList = new REArray<REManagedObject | undefined>(
               thisObj.get_field<REManagedObject>("<BaseDataList>k__BackingField"),
             );
-            for (let i = 0; i < BaseDataList.getCapacity(); i++) {
+            const BaseDataListCapacity = BaseDataList.getCapacity();
+            for (let i = 0; i < BaseDataListCapacity; i++) {
               const BaseData = BaseDataList.get(i);
               if (BaseData != undefined) {
                 if (this.config.get("allWeaponDecoSlotsBecome3PcsLv4")) {

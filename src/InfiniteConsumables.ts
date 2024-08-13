@@ -1,6 +1,6 @@
 import { ConfigManager } from "./ConfigManager";
 import { KeysOfType } from "./Tools/Types";
-import { Utils } from "./Utils";
+import { REArray, Utils } from "./Utils";
 import { imgui_extra } from "./Tools/imgui_extra";
 
 class InfiniteConsumablesConfig {
@@ -80,11 +80,10 @@ export class InfiniteConsumables {
         if (playerBase == undefined) {
           return sdk.PreHookResult.CALL_ORIGINAL;
         }
-        const wireGuages: REManagedObject | undefined = playerBase.get_field("_HunterWireGauge");
-        if (wireGuages == undefined) return;
-        const wireGuages_Count: number = wireGuages.call("get_Count");
-        for (let i = 0; i < wireGuages_Count; i++) {
-          const gauge: REManagedObject | undefined = wireGuages.call("Get", i);
+        const wireGuages = new REArray<REManagedObject | undefined>(playerBase.get_field("_HunterWireGauge"));
+        const wireGuagesCapacity = wireGuages.getCapacity();
+        for (let i = 0; i < wireGuagesCapacity; i++) {
+          const gauge = wireGuages.get(i);
           if (gauge != undefined) {
             gauge.set_field("_RecastTimer", 0);
             gauge.set_field("_RecoverWaitTimer", 0);

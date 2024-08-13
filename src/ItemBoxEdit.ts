@@ -1,5 +1,5 @@
 import { imgui_extra } from "./Tools/imgui_extra";
-import { Utils } from "./Utils";
+import { REList, Utils } from "./Utils";
 import { t_DataShortcut } from "./Type";
 import Components = imgui_extra.Components;
 import TableConfig = imgui_extra.Components.TableConfig;
@@ -38,7 +38,6 @@ class ItemData extends ItemDataReader {
 }
 
 export class ItemBoxEdit {
-  private static get_Item: REMethodDefinition | undefined = undefined;
   private static searchOptions = {
     searchText: "",
     searchByItemBoxSlot: true,
@@ -72,16 +71,12 @@ export class ItemBoxEdit {
         const DataManager: REManagedObject = sdk.get_managed_singleton("snow.data.DataManager");
         const itemBox: REManagedObject = DataManager.get_field("_PlItemBox");
 
-        const itemList: REManagedObject = itemBox.get_field("_InventoryList");
-        const itemListCount: number = itemList.call("get_Count");
-
-        if (this.get_Item == undefined) {
-          this.get_Item = itemList.get_type_definition().get_method("get_Item");
-        }
+        const itemList = new REList<REManagedObject>(itemBox.get_field("_InventoryList"));
+        const itemListCount = itemList.getCount();
 
         const itemDataList: ItemData[] = [];
         for (let i = 0; i < itemListCount; i++) {
-          const itemData = new ItemData(this.get_Item.call(itemList, i), i);
+          const itemData = new ItemData(itemList.get(i), i);
           if (itemData.get_id() != 67108864) {
             itemDataList.push(itemData);
           }
@@ -119,7 +114,7 @@ export class ItemBoxEdit {
         if (Item_box_slot_changed) {
           this.Item_box_slot = Item_box_slot_value;
         }
-        const itemData = new ItemDataReader(this.get_Item.call(itemList, this.Item_box_slot));
+        const itemData = new ItemDataReader(itemList.get(this.Item_box_slot));
         if (itemData.get_id() == 67108864) {
           imgui.text("这个槽位是空的");
         } else {

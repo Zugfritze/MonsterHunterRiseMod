@@ -1,5 +1,5 @@
 import { imgui_extra } from "./Tools/imgui_extra";
-import { Utils } from "./Utils";
+import { REArray, REList, Utils } from "./Utils";
 import { t_DataShortcut } from "./Type";
 import TableConfig = imgui_extra.Components.TableConfig;
 
@@ -67,7 +67,8 @@ class SkillList {
 
   getDataList(): SkillData[] {
     const SkillDataList: SkillData[] = [];
-    for (let Index = 0; Index < this.getCount(); Index++) {
+    const SkillListCount = this.getCount();
+    for (let Index = 0; Index < SkillListCount; Index++) {
       const Id = this.RawData.call<[number], number>("get_Item", Index);
       SkillDataList.push(new SkillData(Id, this.Owner.getVariation()));
     }
@@ -160,14 +161,11 @@ class SupportInfo {
   }
 
   getSupportActionList(): SupportAction[] {
-    const ActionIdList = this.RawData.get_field<REManagedObject>("_SupportActionIdList");
-    const ActionIdList_Count = ActionIdList.call<[], number>("get_Count");
+    const ActionIdList = new REArray<number>(this.RawData.get_field<REManagedObject>("_SupportActionIdList"));
+    const ActionIdListCapacity = ActionIdList.getCapacity();
     const SupportActionList: SupportAction[] = [];
-    for (let i = 0; i < ActionIdList_Count; i++) {
-      const actionId = ActionIdList.call<[number], number | undefined>("Get", i);
-      if (actionId != undefined) {
-        SupportActionList.push(new SupportAction(actionId));
-      }
+    for (let i = 0; i < ActionIdListCapacity; i++) {
+      SupportActionList.push(new SupportAction(ActionIdList.get(i)));
     }
     return SupportActionList;
   }
@@ -214,14 +212,16 @@ class OtomoData {
 class OtomoTools {
   static getEmployedOtomoDataList(DataManager: REManagedObject, otVariation: OtVariation): OtomoData[] {
     const EmployedOtomoList = DataManager.get_field<REManagedObject>("<EmployedOtomoList>k__BackingField");
-    const EmployedOtomoDataListRaw = EmployedOtomoList.call<[OtVariation], REManagedObject>(
-      "getEmployedOtomoDataList(snow.otomo.OtomoDef.OtVariation)",
-      otVariation,
+    const EmployedOtomoDataListRaw = new REList<REManagedObject>(
+      EmployedOtomoList.call<[OtVariation], REManagedObject>(
+        "getEmployedOtomoDataList(snow.otomo.OtomoDef.OtVariation)",
+        otVariation,
+      ),
     );
+    const EmployedOtomoDataListRawCount = EmployedOtomoDataListRaw.getCount();
     const result: OtomoData[] = [];
-    const Count = EmployedOtomoDataListRaw.call<[], number>("get_Count");
-    for (let i = 0; i < Count; i++) {
-      const EmployedOtomoData = EmployedOtomoDataListRaw.call<[number], REManagedObject>("get_Item", i);
+    for (let i = 0; i < EmployedOtomoDataListRawCount; i++) {
+      const EmployedOtomoData = EmployedOtomoDataListRaw.get(i);
       const OtomoDataRaw = EmployedOtomoData.call<[], REManagedObject>("get_OtomoData");
       // EmployedOtomoDataListRaw(C#类型:List<snow.data.EmployedOtomoData>)里是固定的35个EmployedOtomoData但是EmployedOtomoData里面不一定有OtomoData
       if (OtomoDataRaw != undefined) {
@@ -429,10 +429,12 @@ export class BuddySkillEdit {
           }
         });
 
-        const Otomos = DataManager.get_field<REManagedObject>("<AttendantOtomoDataList>k__BackingField");
-        const Otomos_Count = Otomos.call<[], number>("get_Count");
-        for (let i = 0; i < Otomos_Count; i++) {
-          const Otomo = Otomos.call<[number], REManagedObject | undefined>("Get", i);
+        const AttendantOtomoDataList = new REArray<REManagedObject | undefined>(
+          DataManager.get_field<REManagedObject>("<AttendantOtomoDataList>k__BackingField"),
+        );
+        const AttendantOtomoDataListCapacity = AttendantOtomoDataList.getCapacity();
+        for (let i = 0; i < AttendantOtomoDataListCapacity; i++) {
+          const Otomo = AttendantOtomoDataList.get(i);
           if (Otomo != undefined) {
             const otomoData = new OtomoData(Otomo);
             imgui_extra.tree_node(`${otomoData.getName()} (${this.OtVariationMap[otomoData.getVariation()]})`, () => {

@@ -42,20 +42,60 @@ export class Utils {
 
 export class REArray<T> {
   readonly RawData: REManagedObject;
+  private readonly GetMethod: REMethodDefinition;
+  private readonly SetMethod: REMethodDefinition;
+  private readonly get_CountMethod: REMethodDefinition;
 
   constructor(RawData: REManagedObject) {
     this.RawData = RawData;
+    const typeDefinition = RawData.get_type_definition();
+    this.GetMethod = typeDefinition.get_method("Get");
+    this.SetMethod = typeDefinition.get_method("Set");
+    this.get_CountMethod = typeDefinition.get_method("get_Count");
   }
 
   get(index: number): T {
-    return this.RawData.call<[number], T>("Get", index);
+    return this.GetMethod.call<REManagedObject, [number], T>(this.RawData, index);
   }
 
   set(index: number, value: T) {
-    this.RawData.call<[number, T], null>("Set", index, value);
+    this.SetMethod.call<REManagedObject, [number, T], null>(this.RawData, index, value);
   }
 
   getCapacity(): number {
-    return this.RawData.call<[], number>("get_Count");
+    return this.get_CountMethod.call<REManagedObject, [], number>(this.RawData);
+  }
+}
+
+export class REList<T> {
+  readonly RawData: REManagedObject;
+  private readonly get_ItemMethod: REMethodDefinition;
+  private readonly set_ItemMethod: REMethodDefinition;
+  private readonly get_CountMethod: REMethodDefinition;
+  private readonly get_CapacityMethod: REMethodDefinition;
+
+  constructor(RawData: REManagedObject) {
+    this.RawData = RawData;
+    const typeDefinition = RawData.get_type_definition();
+    this.get_ItemMethod = typeDefinition.get_method("get_Item");
+    this.set_ItemMethod = typeDefinition.get_method("set_Item");
+    this.get_CountMethod = typeDefinition.get_method("get_Count");
+    this.get_CapacityMethod = typeDefinition.get_method("get_Capacity");
+  }
+
+  get(index: number): T {
+    return this.get_ItemMethod.call<REManagedObject, [number], T>(this.RawData, index);
+  }
+
+  set(index: number, value: T) {
+    this.set_ItemMethod.call<REManagedObject, [number, T], null>(this.RawData, index, value);
+  }
+
+  getCount(): number {
+    return this.get_CountMethod.call<REManagedObject, [], number>(this.RawData);
+  }
+
+  getCapacity(): number {
+    return this.get_CapacityMethod.call<REManagedObject, [], number>(this.RawData);
   }
 }

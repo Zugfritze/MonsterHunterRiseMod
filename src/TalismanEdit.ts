@@ -1,6 +1,5 @@
 import { imgui_extra } from "./Tools/imgui_extra";
-import { REArray, Utils } from "./Utils";
-import { Debug } from "./Debug";
+import { REArray, REList, Utils } from "./Utils";
 import { SkillData, SkillInfo } from "./Type";
 import Components = imgui_extra.Components;
 import TableConfig = imgui_extra.Components.TableConfig;
@@ -194,8 +193,10 @@ export class TalismanEdit {
         }
 
         const PlEquipBox = DataManager.get_field<REManagedObject>("_PlEquipBox");
-        const WeaponArmorInventoryList = PlEquipBox.get_field<REManagedObject>("_WeaponArmorInventoryList");
-        const WeaponArmorInventoryList_Count = WeaponArmorInventoryList.call<[], number>("get_Count");
+        const WeaponArmorInventoryList = new REList<REManagedObject>(
+          PlEquipBox.get_field<REManagedObject>("_WeaponArmorInventoryList"),
+        );
+        const WeaponArmorInventoryListCount = WeaponArmorInventoryList.getCount();
 
         if (TalismanEdit.CurrentSelectTalisman != undefined) {
           imgui.text(`当前选择护石索引: ${TalismanEdit.CurrentSelectTalisman}`);
@@ -213,9 +214,8 @@ export class TalismanEdit {
         } else imgui.text("没有选择技能");
 
         const TalismanList: TalismanData[] = [];
-        for (let i = 0; i < WeaponArmorInventoryList_Count; i++) {
-          const entry = WeaponArmorInventoryList.call<[number], REManagedObject>("get_Item", i);
-          Debug.add_TypeDefinition(entry.get_type_definition());
+        for (let i = 0; i < WeaponArmorInventoryListCount; i++) {
+          const entry = WeaponArmorInventoryList.get(i);
           const type = entry.get_field<IdTypes>("_IdType");
           if (type == IdTypes.Talisman) {
             TalismanList.push(new TalismanData(entry));
