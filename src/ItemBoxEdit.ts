@@ -75,10 +75,15 @@ export class ItemBoxEdit {
         const itemListCount = itemList.getCount();
 
         const itemDataList: ItemData[] = [];
+        // 为了优化性能，如果空条目数量达到或超过100则停止迭代
+        let emptyCount = 0;
         for (let i = 0; i < itemListCount; i++) {
           const itemData = new ItemData(itemList.get(i), i);
           if (itemData.get_id() != 67108864) {
             itemDataList.push(itemData);
+          } else {
+            emptyCount++;
+            if (emptyCount >= 100) break;
           }
         }
 

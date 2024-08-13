@@ -214,11 +214,18 @@ export class TalismanEdit {
         } else imgui.text("没有选择技能");
 
         const TalismanList: TalismanData[] = [];
+        // 为了优化性能，如果空条目数量达到或超过100则停止迭代
+        let emptyCount = 0;
         for (let i = 0; i < WeaponArmorInventoryListCount; i++) {
           const entry = WeaponArmorInventoryList.get(i);
           const type = entry.get_field<IdTypes>("_IdType");
-          if (type == IdTypes.Talisman) {
-            TalismanList.push(new TalismanData(entry));
+          if (type != IdTypes.Empty) {
+            if (type == IdTypes.Talisman) {
+              TalismanList.push(new TalismanData(entry));
+            }
+          } else {
+            emptyCount++;
+            if (emptyCount >= 100) break;
           }
         }
         imgui_extra.tree_node("护石技能库", () => {
